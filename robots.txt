@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rnatto-gempe.github.io/mrmaxelegance/sitemap.xml
+Sitemap: https://www.mrmaxelegance.com.br/sitemap.xml

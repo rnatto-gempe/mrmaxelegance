@@ -101,7 +101,7 @@ const BRAND_CONFIG = {
   share: {
     title: "MR MAX ELEGANCE | Links Oficiais",
     text: "MR MAX ELEGANCE - Impressões que transformam, qualidade que encanta:",
-    url: "https://linktree.mrmaxelegance.com.br"
+    url: "https://www.mrmaxelegance.com.br/links.html"
   },
 
   // =========================================================================
