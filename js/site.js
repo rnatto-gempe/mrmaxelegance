@@ -203,6 +203,11 @@
   };
   let animacoes = [];
 
+  /* velocidades do cabeçote, em pixels por segundo */
+  const V_TINTA = 200;    /* sobre as letras — constante, é o que se enxerga imprimindo */
+  const V_VAZIO = 1700;   /* nos espaços e na volta de linha — deslocamento sem depositar */
+  const PAUSA   = 1500;   /* ms de descanso entre uma passada e outra */
+
   function animarTitulo() {
     if (semMovimento || !titulo || !gantryX || !gantryY || !bico) return;
     if (!bases.length || !camadas.azul.length) return;
@@ -212,94 +217,139 @@
     animacoes = [];
 
     const W = titulo.getBoundingClientRect();
+    const nolimite = (v) => Math.max(0, Math.min(1, v));
 
-    /* mede a borda direita de cada caractere para saber onde o bico "deposita" */
-    const linhas = bases.map((el, i) => {
+    /* ----------------------------------------------------------
+       1. Mede cada linha NA PRÓPRIA CAMADA que vai ser pintada.
+       Medir na camada (e não no texto de baixo) é o que garante que
+       o recorte caia exatamente na borda do glifo — sem sobra.
+       ---------------------------------------------------------- */
+    const linhas = camadas.azul.map((el, i) => {
+      const r = el.getBoundingClientRect();
+      const linha = {
+        i,
+        x0: r.left - W.left,
+        y: r.top - W.top + r.height / 2,
+        w: r.width,
+        rtl: i % 2 === 1,   /* linha ímpar imprime no sentido contrário, como um cabeçote de verdade */
+        letras: []
+      };
+
       let no = null;
       const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       let cand;
       while ((cand = tw.nextNode())) { if (cand.nodeValue && cand.nodeValue.trim()) { no = cand; break; } }
-      const r = el.getBoundingClientRect();
-      const bordas = [];
-      if (no) {
+
+      const umaLinha = r.height < parseFloat(getComputedStyle(el).fontSize) * 1.6;
+      if (no && umaLinha) {
         const rg = document.createRange();
+        let esq = 0;
         for (let c = 1; c <= no.length; c++) {
           rg.setStart(no, 0); rg.setEnd(no, c);
-          const rr = rg.getBoundingClientRect();
-          if (no.textContent[c - 1] !== ' ') bordas.push(rr.right - r.left);
+          const dir = rg.getBoundingClientRect().right - r.left;
+          linha.letras.push({ esq, dir, vazio: no.textContent[c - 1] === ' ' });
+          esq = dir;
         }
       }
-      const umaLinha = r.height < parseFloat(getComputedStyle(el).fontSize) * 1.6;
-      const ov = (camadas.azul[i] || el).getBoundingClientRect();
-      return {
-        i, el,
-        w: r.width,
-        ow: ov.width || r.width,
-        y: r.top - W.top + r.height / 2,
-        x0: r.left - W.left,
-        bordas: umaLinha ? bordas : []
-      };
+      /* se a linha quebrou em duas (telas estreitas), pinta de uma vez só */
+      if (!linha.letras.length) linha.letras.push({ esq: 0, dir: linha.w, vazio: false });
+      return linha;
     });
 
-    const total = linhas.reduce((a, l) => a + l.bordas.length, 0);
-    if (!total) return;
+    /* ----------------------------------------------------------
+       2. Trajetória de uma passada.
+       O tempo de cada trecho vem da LARGURA dele dividida pela
+       velocidade — por isso o bico anda sempre no mesmo ritmo sobre
+       as letras e dispara nos vazios, em vez de gastar o mesmo
+       tempo em cada caractere.
+       ---------------------------------------------------------- */
+    const eventos = [];
+    let t = 0, ultX = null, ultY = null;
 
-    const passo = 300, pausa = 1800;
-    const passe = total * passo;
-    const off = passe + pausa;
-    const T = off * 3;
+    linhas.forEach((linha) => {
+      const seq = linha.rtl ? linha.letras.slice().reverse() : linha.letras;
+      const partida = linha.rtl ? linha.w : 0;
+      const xPartida = linha.x0 + partida;
 
-    /* ordem de visita: linhas ímpares imprimem da direita para a esquerda (bico em zigue-zague) */
-    const visitas = [];
-    let t = 0;
-    linhas.forEach((l) => {
-      const rtl = l.i % 2 === 1;
-      const bs = rtl ? l.bordas.slice().reverse() : l.bordas;
-      bs.forEach((b) => {
-        visitas.push({ l, rtl, t, x: l.x0 + b, y: l.y });
-        t += passo;
+      /* volta de linha: distância percorrida em vazio */
+      if (ultX !== null) {
+        const dist = Math.hypot(xPartida - ultX, linha.y - ultY);
+        t += Math.max(90, (dist / V_VAZIO) * 1000);
+      }
+      eventos.push({ t, x: xPartida, y: linha.y, linha, p: partida, tinta: false });
+
+      seq.forEach((letra) => {
+        const chegada = linha.rtl ? letra.esq : letra.dir;
+        const largura = Math.abs(letra.dir - letra.esq);
+        const v = letra.vazio ? V_VAZIO : V_TINTA;
+        t += Math.max(12, (largura / v) * 1000);
+        eventos.push({ t, x: linha.x0 + chegada, y: linha.y, linha, p: chegada, tinta: !letra.vazio });
       });
+
+      ultX = eventos[eventos.length - 1].x;
+      ultY = linha.y;
     });
 
+    const passe = t;
+    if (!passe) return;
+    const off = passe + PAUSA;
+    const T = off * 3;
     const opt = { duration: T, iterations: Infinity, fill: 'both' };
 
-    [['azul', 0], ['cinza', off], ['branca', off * 2]].forEach(([cor, atraso]) => {
-      linhas.forEach((l) => {
-        const vs = visitas.filter((v) => v.l === l);
-        if (!vs.length) return;
-        const rtl = l.i % 2 === 1;
-        const vazio = rtl ? 'inset(0 0 0 ' + l.ow.toFixed(1) + 'px)'
-                          : 'inset(0 ' + l.ow.toFixed(1) + 'px 0 0)';
-        const inicio = Math.min(1, (atraso + vs[0].t) / T);
-        const fim    = Math.min(1, (atraso + vs[vs.length - 1].t) / T);
-        const kf = [{ clipPath: vazio, offset: 0 }];
-        if (inicio > 0.0006) kf.push({ clipPath: vazio, offset: inicio - 0.0005 });
+    /* ----------------------------------------------------------
+       3. A tinta: cada letra é preenchida INTEIRA no instante em que
+       o bico entra nela (steps), nunca pela metade.
+       ---------------------------------------------------------- */
+    [['azul', 0], ['cinza', off], ['branca', off * 2]].forEach((par) => {
+      const cor = par[0], atraso = par[1];
+      linhas.forEach((linha) => {
+        const alvo = camadas[cor][linha.i];
+        const evs = eventos.filter((e) => e.linha === linha);
+        if (!alvo || !evs.length) return;
 
-        let anterior = vazio;
-        vs.forEach((v, vi) => {
-          const avanco = rtl ? l.w - (v.x - l.x0) : (v.x - l.x0);
-          const resto  = vi === vs.length - 1 ? 0 : Math.max(0, l.ow - avanco);
-          anterior = rtl ? 'inset(0 0 0 ' + resto.toFixed(1) + 'px)'
-                         : 'inset(0 ' + resto.toFixed(1) + 'px 0 0)';
-          kf.push({ clipPath: anterior, offset: Math.min(1, (atraso + v.t) / T), easing: 'cubic-bezier(.45,0,.55,1)' });
-        });
-        if (fim < 0.9994) kf.push({ clipPath: anterior, offset: fim + 0.0005 });
-        kf.push({ clipPath: anterior, offset: 1 });
+        const recorte = (p) => linha.rtl
+          ? 'inset(0 0 0 ' + Math.max(0, p).toFixed(1) + 'px)'
+          : 'inset(0 ' + Math.max(0, linha.w - p).toFixed(1) + 'px 0 0)';
 
-        const alvo = camadas[cor][l.i];
-        if (alvo) animacoes.push(alvo.animate(kf, opt));
+        const seca  = recorte(linha.rtl ? linha.w : 0);
+        const cheia = recorte(linha.rtl ? 0 : linha.w);
+
+        const kf = [{ clipPath: seca, offset: 0, easing: 'steps(1, end)' }];
+        const oIni = nolimite((atraso + evs[0].t) / T);
+        if (oIni > 0.0012) kf.push({ clipPath: seca, offset: oIni - 0.001, easing: 'steps(1, end)' });
+
+        /* o keyframe entra no instante em que o bico ALCANÇA a letra e já
+           leva o recorte até o fim dela; com steps(1,end) esse valor vale
+           por todo o trecho, então a letra nasce completa e nunca pela metade */
+        let anterior = oIni;
+        for (let k = 0; k < evs.length; k++) {
+          const e = evs[k];
+          const o = Math.max(anterior, nolimite((atraso + (k === 0 ? e.t : evs[k - 1].t)) / T));
+          kf.push({ clipPath: recorte(e.p), offset: o, easing: 'steps(1, end)' });
+          anterior = o;
+        }
+        kf.push({ clipPath: cheia, offset: Math.max(anterior, nolimite((atraso + evs[evs.length - 1].t) / T)), easing: 'steps(1, end)' });
+        kf.push({ clipPath: cheia, offset: 1 });
+
+        animacoes.push(alvo.animate(kf, opt));
       });
     });
 
-    /* gantry: o eixo X chega um pouco antes do Y, como numa máquina de verdade */
+    /* ----------------------------------------------------------
+       4. O cabeçote: movimento linear, sem acelerar e frear a cada
+       caractere, e em cima da letra que acabou de sair.
+       ---------------------------------------------------------- */
     const kx = [], ky = [];
     [0, off, off * 2].forEach((atraso) => {
-      visitas.forEach((v) => {
-        const tt = v.t + atraso;
-        kx.push({ left: v.x.toFixed(1) + 'px', offset: Math.max(0, Math.min(1, (tt - passo * 0.45) / T)), easing: 'cubic-bezier(.45,0,.55,1)' });
-        ky.push({ top:  v.y.toFixed(1) + 'px', offset: Math.max(0, Math.min(1, tt / T)), easing: 'cubic-bezier(.45,0,.55,1)' });
+      eventos.forEach((e) => {
+        const tt = e.t + atraso;
+        kx.push({ left: e.x.toFixed(1) + 'px', offset: nolimite(tt / T), easing: 'linear' });
+        ky.push({ top:  e.y.toFixed(1) + 'px', offset: nolimite(tt / T), easing: 'linear' });
       });
     });
+    kx.sort((a, b) => a.offset - b.offset);
+    ky.sort((a, b) => a.offset - b.offset);
+
     animacoes.push(gantryX.animate(kx, opt), gantryY.animate(ky, opt),
                    bico.animate(kx, opt), bico.animate(ky, opt));
   }
