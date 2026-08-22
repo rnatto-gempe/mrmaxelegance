@@ -219,6 +219,40 @@
     const W = titulo.getBoundingClientRect();
     const nolimite = (v) => Math.max(0, Math.min(1, v));
 
+    /* Quanto a tinta de cada letra passa da caixa de avanço.
+       Com letter-spacing negativo o desenho do glifo sobra para fora do
+       avanço; cortar na borda do avanço deixaria essa beirada por pintar.
+       O canvas sabe dizer a extensão real da tinta (actualBoundingBoxRight). */
+    const medidor = (function () {
+      try {
+        const ctx = document.createElement('canvas').getContext('2d');
+        if (!ctx || !('letterSpacing' in ctx)) return null;
+        return ctx;
+      } catch (e) { return null; }
+    })();
+
+    function sobrasDaLinha(el, texto, larguraReal) {
+      const est = getComputedStyle(el);
+      const aperto = Math.abs(parseFloat(est.letterSpacing) || 0);
+      const reserva = aperto + 0.75;   /* usado quando não dá para medir */
+
+      if (!medidor) return { fixa: reserva, lista: null };
+      try {
+        medidor.font = est.fontWeight + ' ' + est.fontSize + ' ' + est.fontFamily;
+        medidor.letterSpacing = est.letterSpacing;
+        const total = medidor.measureText(texto).width;
+        /* o canvas não aplica font-variation-settings; a escala de largura
+           corrige a diferença entre a medida dele e a da página */
+        const escala = total > 0 ? larguraReal / total : 1;
+        const lista = [];
+        for (let c = 1; c <= texto.length; c++) {
+          const m = medidor.measureText(texto.slice(0, c));
+          lista.push(Math.max(0, (m.actualBoundingBoxRight - m.width) * escala) + 0.6);
+        }
+        return { fixa: reserva, lista };
+      } catch (e) { return { fixa: reserva, lista: null }; }
+    }
+
     /* ----------------------------------------------------------
        1. Mede cada linha NA PRÓPRIA CAMADA que vai ser pintada.
        Medir na camada (e não no texto de baixo) é o que garante que
@@ -240,19 +274,29 @@
       let cand;
       while ((cand = tw.nextNode())) { if (cand.nodeValue && cand.nodeValue.trim()) { no = cand; break; } }
 
-      const umaLinha = r.height < parseFloat(getComputedStyle(el).fontSize) * 1.6;
+      const corpo = parseFloat(getComputedStyle(el).fontSize) || 40;
+      /* pernas de q/p/g e acentos passam da caixa da linha; o recorte precisa
+         abrir para fora dela, senão a ponta da letra fica sem pintar */
+      linha.alto = Math.max(20, corpo * 0.5);
+      const umaLinha = r.height < corpo * 1.6;
       if (no && umaLinha) {
+        const sobras = sobrasDaLinha(el, no.textContent, r.width);
         const rg = document.createRange();
         let esq = 0;
         for (let c = 1; c <= no.length; c++) {
           rg.setStart(no, 0); rg.setEnd(no, c);
           const dir = rg.getBoundingClientRect().right - r.left;
-          linha.letras.push({ esq, dir, vazio: no.textContent[c - 1] === ' ' });
+          const sangra = sobras.lista ? sobras.lista[c - 1] : sobras.fixa;
+          linha.letras.push({
+            esq, dir,
+            vazio: no.textContent[c - 1] === ' ',
+            folga: Math.min(6, sangra)
+          });
           esq = dir;
         }
       }
       /* se a linha quebrou em duas (telas estreitas), pinta de uma vez só */
-      if (!linha.letras.length) linha.letras.push({ esq: 0, dir: linha.w, vazio: false });
+      if (!linha.letras.length) linha.letras.push({ esq: 0, dir: linha.w, vazio: false, folga: 0 });
       return linha;
     });
 
@@ -276,14 +320,14 @@
         const dist = Math.hypot(xPartida - ultX, linha.y - ultY);
         t += Math.max(90, (dist / V_VAZIO) * 1000);
       }
-      eventos.push({ t, x: xPartida, y: linha.y, linha, p: partida, tinta: false });
+      eventos.push({ t, x: xPartida, y: linha.y, linha, p: partida, folga: 0, tinta: false });
 
       seq.forEach((letra) => {
         const chegada = linha.rtl ? letra.esq : letra.dir;
         const largura = Math.abs(letra.dir - letra.esq);
         const v = letra.vazio ? V_VAZIO : V_TINTA;
         t += Math.max(12, (largura / v) * 1000);
-        eventos.push({ t, x: linha.x0 + chegada, y: linha.y, linha, p: chegada, tinta: !letra.vazio });
+        eventos.push({ t, x: linha.x0 + chegada, y: linha.y, linha, p: chegada, folga: letra.folga || 0, tinta: !letra.vazio });
       });
 
       ultX = eventos[eventos.length - 1].x;
@@ -307,12 +351,13 @@
         const evs = eventos.filter((e) => e.linha === linha);
         if (!alvo || !evs.length) return;
 
-        const recorte = (p) => linha.rtl
-          ? 'inset(0 0 0 ' + Math.max(0, p).toFixed(1) + 'px)'
-          : 'inset(0 ' + Math.max(0, linha.w - p).toFixed(1) + 'px 0 0)';
+        const fora = (-linha.alto).toFixed(1) + 'px';
+        const recorte = (p, f) => linha.rtl
+          ? 'inset(' + fora + ' ' + fora + ' ' + fora + ' ' + Math.max(0, p - (f || 0)).toFixed(1) + 'px)'
+          : 'inset(' + fora + ' ' + Math.max(0, linha.w - p - (f || 0)).toFixed(1) + 'px ' + fora + ' ' + fora + ')';
 
-        const seca  = recorte(linha.rtl ? linha.w : 0);
-        const cheia = recorte(linha.rtl ? 0 : linha.w);
+        const seca  = recorte(linha.rtl ? linha.w : 0, 0);
+        const cheia = recorte(linha.rtl ? 0 : linha.w, 0);
 
         const kf = [{ clipPath: seca, offset: 0, easing: 'steps(1, end)' }];
         const oIni = nolimite((atraso + evs[0].t) / T);
@@ -325,7 +370,7 @@
         for (let k = 0; k < evs.length; k++) {
           const e = evs[k];
           const o = Math.max(anterior, nolimite((atraso + (k === 0 ? e.t : evs[k - 1].t)) / T));
-          kf.push({ clipPath: recorte(e.p), offset: o, easing: 'steps(1, end)' });
+          kf.push({ clipPath: recorte(e.p, k > 0 ? e.folga : 0), offset: o, easing: 'steps(1, end)' });
           anterior = o;
         }
         kf.push({ clipPath: cheia, offset: Math.max(anterior, nolimite((atraso + evs[evs.length - 1].t) / T)), easing: 'steps(1, end)' });
