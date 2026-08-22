@@ -120,3 +120,8 @@ const BRAND_CONFIG = {
     webhookUrl: ""
   }
 };
+
+/* `const` no topo de um script clássico não vira propriedade de window, e é
+   de window.BRAND_CONFIG que app.js lê a configuração — sem esta linha, o
+   compartilhamento, o QR code e o vCard caíam nos valores de emergência. */
+window.BRAND_CONFIG = BRAND_CONFIG;

@@ -21,8 +21,8 @@
   --escuro-claro: #4A5661;
   --calha: clamp(52px, 5vw, 84px);
   --cm: 37.8px;            /* px por centímetro — recalibrável no CAL */
-  --mono: 'Space Mono', ui-monospace, monospace;
-  --display: Archivo, 'Arial Narrow', system-ui, sans-serif;
+  --mono: 'Space Mono', 'Mono Espera', ui-monospace, monospace;
+  --display: Archivo, 'Archivo Espera', 'Arial Narrow', system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -35,7 +35,7 @@ body {
   position: relative;
   background: var(--preto);
   color: var(--branco);
-  font-family: Sora, system-ui, sans-serif;
+  font-family: Sora, 'Sora Espera', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -239,7 +239,7 @@ a:hover { color: var(--azul-pale); }
 .nota.is-on { opacity: .8; }
 .nota p, .nota button {
   margin: 0;
-  font-family: Caveat, cursive;
+  font-family: Caveat, 'Caveat Espera', cursive;
   font-size: 18px; line-height: 1.2;
   color: var(--cinza-1);
   background: rgba(5, 7, 10, .86);
@@ -774,7 +774,7 @@ a:hover { color: var(--azul-pale); }
 .segredo { padding: 0 clamp(18px, 3.2vw, 40px) 40px; display: flex; justify-content: flex-end; }
 .segredo[hidden] { display: none; }
 .segredo > div { max-width: 420px; display: flex; align-items: flex-start; gap: 10px; opacity: .75; }
-.segredo p { margin: 0; font-family: Caveat, cursive; font-size: 19px; line-height: 1.25; color: var(--cinza-2); text-align: left; }
+.segredo p { margin: 0; font-family: Caveat, 'Caveat Espera', cursive; font-size: 19px; line-height: 1.25; color: var(--cinza-2); text-align: left; }
 
 /* ============================================================
    PLACEHOLDER DE FOTO — moldura técnica enquanto não há imagem

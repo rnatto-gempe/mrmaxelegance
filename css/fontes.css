@@ -1,0 +1,104 @@
+/* ============================================================
+   Fontes servidas pelo próprio site.
+
+   Vindas do Google, o navegador precisava resolver o DNS, abrir conexão
+   e só então baixar o arquivo. Nesse intervalo o texto saía na fonte do
+   sistema e trocava depois — aquele salto de tamanho ao carregar.
+   Aqui elas viajam junto com a página, e o preload no <head> as coloca
+   na frente da fila.
+
+   Os ajustes das fontes de espera foram medidos comparando a largura
+   de uma mesma frase nas duas fontes, no tamanho de uso real.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('../assets/fontes/archivo.woff2') format('woff2-variations');
+  font-weight: 600 800;
+  font-stretch: 108% 118%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sora';
+  src: url('../assets/fontes/sora.woff2') format('woff2-variations');
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../assets/fontes/space-mono.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('../assets/fontes/caveat.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('../assets/fontes/plus-jakarta-sans.woff2') format('woff2-variations');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------
+   Fontes de espera: a do sistema, calçada para ocupar exatamente o
+   mesmo espaço da fonte real. Se o arquivo demorar, o texto aparece
+   assim mesmo — e quando a fonte chega, nada muda de lugar.
+   ------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'Archivo Espera';
+  src: local('Arial Narrow'), local('Helvetica Neue Condensed Bold'), local('Arial');
+  size-adjust: 107.3%;
+  ascent-override: 83.8%;
+  descent-override: 23.3%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Sora Espera';
+  src: local('Helvetica Neue'), local('Helvetica'), local('Arial');
+  size-adjust: 88.5%;
+  ascent-override: 101.6%;
+  descent-override: 28.3%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Mono Espera';
+  src: local('Menlo'), local('Consolas'), local('DejaVu Sans Mono'), local('Courier New');
+  size-adjust: 70.8%;
+  ascent-override: 127%;
+  descent-override: 35.3%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Caveat Espera';
+  src: local('Bradley Hand'), local('Segoe Script'), local('Comic Sans MS');
+  size-adjust: 96.3%;
+  ascent-override: 93.4%;
+  descent-override: 26%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Jakarta Espera';
+  src: local('Helvetica Neue'), local('Helvetica'), local('Arial');
+  size-adjust: 97%;
+  ascent-override: 101%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}

@@ -7,9 +7,8 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#05070A">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icone-32.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@108..118,600..800&family=Sora:wght@300..600&family=Space+Mono&display=swap" rel="stylesheet">
+<link rel="preload" href="assets/fontes/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/fontes.css?v=20260822b">
 <style>
   :root { --preto:#05070A; --branco:#F2F6FA; --azul:#1868C6; --azul-claro:#4FA3F7; --cinza:#A9B7C4; }
   * { box-sizing: border-box; }
@@ -18,11 +17,11 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 26px; padding: 40px 24px; text-align: center;
     background: var(--preto); color: var(--branco);
-    font-family: Sora, system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+    font-family: Sora, 'Sora Espera', system-ui, sans-serif; -webkit-font-smoothing: antialiased;
   }
-  .selo { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .26em; color: var(--azul-claro); }
+  .selo { font-family: 'Space Mono', 'Mono Espera', monospace; font-size: 11px; letter-spacing: .26em; color: var(--azul-claro); }
   h1 {
-    margin: 0; font-family: Archivo, sans-serif;
+    margin: 0; font-family: Archivo, 'Archivo Espera', 'Arial Narrow', sans-serif;
     font-variation-settings: 'wdth' 115, 'wght' 800;
     font-size: clamp(38px, 9vw, 90px); text-transform: uppercase; letter-spacing: -.03em; line-height: .95;
   }
@@ -34,7 +33,7 @@
   }
   .voltar:hover { transform: translateY(-2px); }
   .voltar:focus-visible { outline: 2px solid var(--azul-claro); outline-offset: 3px; }
-  .zap { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .18em; color: var(--azul-claro); }
+  .zap { font-family: 'Space Mono', 'Mono Espera', monospace; font-size: 11px; letter-spacing: .18em; color: var(--azul-claro); }
 </style>
 </head>
 <body>
