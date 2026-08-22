@@ -876,3 +876,187 @@ a:hover { color: var(--azul-pale); }
   .barra i { transform: scaleX(1); }
   .slogan span.wipe { clip-path: inset(0 0 0 0); }
 }
+
+/* ============================================================
+   MESA DE TESTE — o joguinho do cabeçote
+   ============================================================ */
+.jogo-brief {
+  margin: -12px 0 28px;
+  max-width: 640px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--cinza-2);
+  font-weight: 300;
+}
+
+.jogo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 250px);
+  gap: clamp(16px, 2.5vw, 28px);
+  align-items: start;
+}
+
+.jogo-mesa {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: var(--preto);
+  aspect-ratio: 5 / 3;
+  min-width: 0;
+}
+.jogo-mesa canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.jogo-mesa canvas:focus-visible {
+  outline: 2px solid var(--azul-claro);
+  outline-offset: 2px;
+}
+
+/* véu de início, pausa e fim */
+.jogo-veu {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: clamp(18px, 4vw, 36px);
+  text-align: center;
+  background: rgba(5, 7, 10, .88);
+  backdrop-filter: blur(2px);
+}
+.jogo-veu.is-on { display: flex; }
+.jogo-titulo {
+  margin: 0;
+  font-family: var(--display);
+  font-variation-settings: 'wdth' 112, 'wght' 800;
+  font-size: clamp(24px, 3.4vw, 40px);
+  text-transform: uppercase;
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+.jogo-texto {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--cinza-1);
+  font-weight: 300;
+}
+.jogo-acoes { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+.jogo-acoes .btn { height: 46px; font-size: 14px; }
+.jogo-recorde {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  color: var(--cinza-3);
+}
+
+/* painel lateral */
+.jogo-painel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  min-width: 0;
+}
+.jogo-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  color: var(--cinza-3);
+}
+.jogo-linha b {
+  font-family: var(--display);
+  font-variation-settings: 'wdth' 108, 'wght' 700;
+  font-size: 15px;
+  letter-spacing: 0;
+  color: var(--branco);
+  text-align: right;
+}
+.jogo-barra {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, .1);
+  overflow: hidden;
+}
+.jogo-barra i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--azul);
+  transition: width .12s linear, background .3s ease;
+}
+.jogo-barra i.is-baixo { background: #E8613A; }
+
+.jogo-ajuda {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cinza-3);
+  font-weight: 300;
+}
+
+/* setas de toque */
+.jogo-setas {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas: '. cima .' 'esq baixo dir';
+  gap: 6px;
+  margin-top: 6px;
+}
+.jogo-seta {
+  height: 46px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, .18);
+  color: var(--branco);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.jogo-seta:active { background: rgba(30, 123, 232, .22); border-color: var(--azul); }
+.jogo-seta-cima  { grid-area: cima; }
+.jogo-seta-esq   { grid-area: esq; }
+.jogo-seta-dir   { grid-area: dir; }
+.jogo-seta-baixo { grid-area: baixo; }
+
+@media (hover: none) and (pointer: coarse) {
+  .jogo-setas { display: grid; }
+}
+
+@media (max-width: 860px) {
+  .jogo { grid-template-columns: minmax(0, 1fr); }
+  .jogo-painel { flex-direction: row; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
+  .jogo-linha { flex: 1 1 128px; }
+  .jogo-ajuda, .jogo-setas { flex-basis: 100%; }
+}
+
+/* legenda do jogo */
+.jogo-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--cinza-3);
+  text-transform: uppercase;
+}
+.jogo-legenda li { display: flex; align-items: center; gap: 9px; }
+.jogo-legenda b { color: var(--cinza-1); font-weight: 400; }
+.amostra { width: 14px; height: 14px; display: block; flex: none; }
+.amostra-parede { border: 2px solid rgba(191, 224, 255, .9); }
+.amostra-feito  { background: var(--azul); }
+.amostra-solto  { border-top: 3px solid #E8613A; height: 3px; align-self: center; }

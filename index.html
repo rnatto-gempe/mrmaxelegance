@@ -112,6 +112,7 @@
     <a href="#pecas">01 PEÇAS</a>
     <a href="#materiais">02 MATERIAIS</a>
     <a href="#processo">03 PROCESSO</a>
+    <a href="#mesa-de-teste">04 MESA</a>
     <a href="#contato" class="cta">ORÇAMENTO</a>
   </nav>
 </header>
@@ -332,6 +333,61 @@
   </div>
 </section>
 
+<!-- ============ JOGO ============ -->
+<section id="mesa-de-teste" class="sec wrap">
+  <div class="sec-cab">
+    <h2 class="h2 rev">Assuma o cabeçote</h2>
+    <span class="dica">SETAS OU WASD · EIXOS X/Y</span>
+  </div>
+
+  <p class="jogo-brief"><b>As setas apontam a direção; o bico anda sozinho e imprime por onde passa.</b>
+  Sua missão é cobrir todas as paredes brancas da peça. Fora delas o filamento vira fio solto — e o carretel
+  precisa dar conta das seis peças do pedido.</p>
+
+  <ul class="jogo-legenda">
+    <li><i class="amostra amostra-parede"></i> parede a imprimir <b>— passe por cima</b></li>
+    <li><i class="amostra amostra-feito"></i> já impresso</li>
+    <li><i class="amostra amostra-solto"></i> fio solto <b>— gasta o triplo</b></li>
+  </ul>
+
+  <div class="jogo">
+    <div class="jogo-mesa">
+      <canvas id="mesa" tabindex="0" role="img"
+              aria-label="Mesa de impressão: conduza o cabeçote com as setas do teclado para traçar as paredes da peça"></canvas>
+
+      <div class="jogo-veu is-on" id="jogoVeu">
+        <p class="jogo-titulo" id="veuTitulo">Turno de impressão</p>
+        <p class="jogo-texto" id="veuTexto">A primeira peça é um treino curto. Aponte com as setas e cubra as paredes brancas — o bico faz o resto.</p>
+        <div class="jogo-acoes">
+          <button class="btn btn-solido" id="jogoBotao" type="button">Ligar a impressora</button>
+          <a class="btn btn-vazado" id="veuCta" href="https://wa.me/5543996070804" target="_blank" rel="noopener" hidden>Encomendar de verdade</a>
+        </div>
+        <p class="jogo-recorde" id="veuRecorde"></p>
+      </div>
+    </div>
+
+    <div class="jogo-painel">
+      <div class="jogo-linha">
+        <span>FILAMENTO</span>
+        <div class="jogo-barra"><i id="barraFilamento"></i></div>
+      </div>
+      <div class="jogo-linha"><span>PEÇA</span><b id="jogoPeca">—</b></div>
+      <div class="jogo-linha"><span>PEDIDO</span><b id="jogoEtapa">1/7</b></div>
+      <div class="jogo-linha"><span>PAREDES</span><b id="jogoProgresso">0/0</b></div>
+      <div class="jogo-linha"><span>COMBO</span><b id="jogoCombo">1×</b></div>
+      <div class="jogo-linha"><span>PONTOS</span><b id="jogoPontos">0</b></div>
+      <div class="jogo-linha"><span>RECORDE</span><b id="jogoRecorde">0</b></div>
+      <p class="jogo-ajuda">ESC pausa. No celular, arraste sobre a mesa ou use as setas abaixo.</p>
+      <div class="jogo-setas" aria-hidden="true">
+        <button type="button" data-eixo="0,-1" class="jogo-seta jogo-seta-cima">↑</button>
+        <button type="button" data-eixo="-1,0" class="jogo-seta jogo-seta-esq">←</button>
+        <button type="button" data-eixo="1,0"  class="jogo-seta jogo-seta-dir">→</button>
+        <button type="button" data-eixo="0,1"  class="jogo-seta jogo-seta-baixo">↓</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ GALERIA ============ -->
 <section class="sec">
   <div class="galeria rev">
@@ -426,5 +482,6 @@
 </div>
 
 <script src="js/site.js?v=20260822b"></script>
+<script src="js/jogo.js?v=20260822b"></script>
 </body>
 </html>
