@@ -73,13 +73,23 @@ A calha da esquerda é uma régua de verdade: usa a densidade de pixels da tela 
 centímetros. Dá para arrastar (mouse ou toque) para medir qualquer elemento e calibrar no
 botão **CAL** encostando um cartão de crédito na tela — a calibração fica salva no navegador.
 
+## Fontes
+
+As cinco fontes ficam em `assets/fontes` (só o subconjunto latino) e são declaradas em
+`css/fontes.css`. Vindas do Google, elas chegavam depois da primeira pintura e o texto
+aparecia na fonte do sistema antes de trocar — com aquele salto de tamanho. As três usadas
+acima da dobra entram com `<link rel="preload">` e ficam prontas em torno de 260 ms.
+
+Cada família tem uma **fonte de espera** com `size-adjust` e `ascent-override` medidos, para
+que o texto provisório ocupe exatamente o mesmo espaço caso o arquivo demore.
+
 ## Publicando uma alteração
 
 O site está atrás do Cloudflare, que guarda CSS e JS por até 4 horas. Por isso as
 folhas e os scripts são chamados com um número de versão:
 
 ```html
-<link rel="stylesheet" href="css/site.css?v=20260822">
+<link rel="stylesheet" href="css/site.css?v=20260822b">
 ```
 
 **Ao mexer em qualquer arquivo de `css/` ou `js/`, troque esse número** (a data serve bem)
