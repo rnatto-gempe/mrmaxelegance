@@ -202,6 +202,18 @@
     branca: $$('.camada-branca')
   };
   let animacoes = [];
+  let geometria = '';   /* impressão digital do layout do título */
+
+  /* Só vale recriar a animação quando a geometria muda de verdade (fonte que
+     acabou de carregar, largura da janela). Sem isso, cada chamada recomeçava
+     a impressão do zero e o título ficava reiniciando sozinho. */
+  function assinatura() {
+    if (!titulo) return '';
+    const r = titulo.getBoundingClientRect();
+    const corpo = bases[0] ? getComputedStyle(bases[0]).fontSize : '';
+    return r.width.toFixed(1) + 'x' + r.height.toFixed(1) + '/' + corpo + '/' +
+      camadas.azul.map((el) => el.getBoundingClientRect().width.toFixed(1)).join(',');
+  }
 
   /* velocidades do cabeçote, em pixels por segundo */
   const V_TINTA = 200;    /* sobre as letras — constante, é o que se enxerga imprimindo */
@@ -213,6 +225,15 @@
     if (!bases.length || !camadas.azul.length) return;
     if (!('animate' in Element.prototype)) return;
 
+    const agora = assinatura();
+    if (agora === geometria && animacoes.length) return;   /* nada mudou: deixa imprimindo */
+    geometria = agora;
+
+    /* onde a impressão estava, para retomar dali em vez de voltar ao começo */
+    let fase = null;
+    if (animacoes.length) {
+      try { fase = animacoes[0].currentTime; } catch (e) {}
+    }
     animacoes.forEach((a) => { try { a.cancel(); } catch (e) {} });
     animacoes = [];
 
@@ -397,6 +418,11 @@
 
     animacoes.push(gantryX.animate(kx, opt), gantryY.animate(ky, opt),
                    bico.animate(kx, opt), bico.animate(ky, opt));
+
+    if (fase != null) {
+      const retoma = fase % T;
+      animacoes.forEach((a) => { try { a.currentTime = retoma; } catch (e) {} });
+    }
   }
 
   /* ==========================================================
@@ -409,14 +435,22 @@
   /* ==========================================================
      8. CICLO DE VIDA
      ========================================================== */
+  let alturaDoc = 0;
+
+  /* barato e sem efeito na animação: só a régua e as cotas */
+  function remedirRegua() {
+    const h = Math.ceil(document.body.scrollHeight);
+    if (Math.abs(h - alturaDoc) > 4) { alturaDoc = h; desenharNumeros(); }
+    medirDesenho();
+  }
+
   let agendado;
   function remedir() {
     clearTimeout(agendado);
     agendado = setTimeout(() => {
-      desenharNumeros();
-      medirDesenho();
-      animarTitulo();
-    }, 180);
+      remedirRegua();
+      animarTitulo();   /* a assinatura decide se há motivo para recriar */
+    }, 200);
   }
 
   function iniciar() {
@@ -424,8 +458,6 @@
     ativarPeca(0);
     atualizarProgresso();
     animarTitulo();
-    setTimeout(animarTitulo, 700);
-    setTimeout(remedir, 1600);
   }
 
   window.addEventListener('scroll', atualizarProgresso, { passive: true });
@@ -436,7 +468,15 @@
     window.removeEventListener('scroll', esconderTip);
   }, { passive: true });
   window.addEventListener('resize', remedir);
-  if (window.ResizeObserver) new ResizeObserver(remedir).observe(document.body);
+  /* a altura do documento muda a toda hora (imagens, seções que revelam):
+     isso mexe na régua, nunca na impressão do título */
+  if (window.ResizeObserver) {
+    let pendente;
+    new ResizeObserver(() => {
+      clearTimeout(pendente);
+      pendente = setTimeout(remedirRegua, 200);
+    }).observe(document.body);
+  }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(remedir);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
