@@ -73,6 +73,20 @@ A calha da esquerda é uma régua de verdade: usa a densidade de pixels da tela 
 centímetros. Dá para arrastar (mouse ou toque) para medir qualquer elemento e calibrar no
 botão **CAL** encostando um cartão de crédito na tela — a calibração fica salva no navegador.
 
+## Publicando uma alteração
+
+O site está atrás do Cloudflare, que guarda CSS e JS por até 4 horas. Por isso as
+folhas e os scripts são chamados com um número de versão:
+
+```html
+<link rel="stylesheet" href="css/site.css?v=20260822">
+```
+
+**Ao mexer em qualquer arquivo de `css/` ou `js/`, troque esse número** (a data serve bem)
+em todas as páginas que o usam. Sem isso, quem já visitou o site continua vendo a versão
+antiga até o cache expirar. Para publicar na hora, dá para limpar o cache no painel do
+Cloudflare (Caching → Purge Everything).
+
 ## Rodando local
 
 ```bash
