@@ -3,46 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MR MAX ELEGANCE | Impressão 3D sob medida em Londrina</title>
+<title>MR MAX ELEGANCE | Impressão 3D sob medida</title>
 <meta name="description" content="Brinquedos que aguentam criança, objetos que resolvem a casa e aquela peça que ninguém mais fabrica. Impressão 3D em PLA, PETG, TPU e resina — impressa, lixada e conferida à mão. Orçamento no WhatsApp (43) 99607-0804.">
 <meta name="theme-color" content="#05070A">
 <link rel="canonical" href="https://rnatto-gempe.github.io/mrmaxelegance/">
-<link rel="icon" href="assets/logo-mrmax.jpeg">
-<link rel="apple-touch-icon" href="assets/logo-mrmax.jpeg">
+
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icone-32.png">
+<link rel="apple-touch-icon" href="assets/icone-180.png">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MR MAX ELEGANCE">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="https://rnatto-gempe.github.io/mrmaxelegance/">
 <meta property="og:title" content="MR MAX ELEGANCE | Impressões que transformam">
 <meta property="og:description" content="Tudo que falta na sua casa cabe na mesa de impressão. Peças sob medida, impressas e acabadas à mão.">
-<meta property="og:image" content="assets/logo-mrmax.jpeg">
+<meta property="og:image" content="https://rnatto-gempe.github.io/mrmaxelegance/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logotipo MR MAX ELEGANCE">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MR MAX ELEGANCE | Impressões que transformam">
+<meta name="twitter:description" content="Peças sob medida em impressão 3D, acabadas à mão.">
+<meta name="twitter:image" content="https://rnatto-gempe.github.io/mrmaxelegance/assets/og.jpg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Caveat:wght@500;600&family=Sora:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@108..118,600..800&family=Caveat:wght@500&family=Sora:wght@300..600&family=Space+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/site.css">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
+  "@id": "https://rnatto-gempe.github.io/mrmaxelegance/#negocio",
   "name": "MR MAX ELEGANCE",
-  "description": "Impressão 3D sob medida: brinquedos, objetos de casa e peças de reposição.",
-  "image": "assets/logo-mrmax.jpeg",
+  "description": "Impressão 3D sob medida: brinquedos, objetos de casa e peças de reposição, impressas e acabadas à mão.",
+  "url": "https://rnatto-gempe.github.io/mrmaxelegance/",
+  "image": "https://rnatto-gempe.github.io/mrmaxelegance/assets/og.jpg",
+  "logo": "https://rnatto-gempe.github.io/mrmaxelegance/assets/icone-180.png",
   "telephone": "+5543996070804",
   "email": "contato@mrmaxelegance.com.br",
   "priceRange": "$$",
-  "openingHours": "Mo-Sa 09:00-19:00",
-  "sameAs": ["https://www.instagram.com/rmmax.elegance/", "https://wa.me/5543996070804"]
+  "areaServed": "BR",
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "09:00",
+    "closes": "19:00"
+  }],
+  "sameAs": [
+    "https://www.instagram.com/rmmax.elegance/",
+    "https://wa.me/5543996070804"
+  ],
+  "makesOffer": [
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Impressão 3D sob medida" } },
+    { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Peças de reposição impressas em 3D" } }
+  ]
 }
 </script>
 </head>
 <body>
 
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
 <!-- ============ RÉGUA LATERAL ============ -->
-<div class="ruler" id="ruler" title="Arraste (mouse ou toque) para medir"></div>
+<div class="ruler" id="ruler" title="Arraste (mouse ou toque) para medir" aria-hidden="true"></div>
 <button class="ruler-reset" id="rulerReset" title="Voltar a régua ao lugar" aria-label="Voltar a régua ao lugar">↺</button>
-<span class="ruler-badge" id="rulerBadge">ARRASTE PARA MEDIR</span>
+<span class="ruler-badge" id="rulerBadge" aria-hidden="true">ARRASTE PARA MEDIR</span>
 
 <div class="cal-corner">
   <button class="cal-btn" id="calBtn" title="Calibrar régua">CAL</button>
@@ -56,12 +83,12 @@
   <p>cm quase reais — arraste pra medir<br><span style="color:#6B7885">exato depois do CAL</span></p>
 </div>
 
-<div class="nota nota-tip" id="notaTip">
+<div class="nota nota-tip" id="notaTip" aria-hidden="true">
   <svg width="34" height="30" viewBox="0 0 34 30" fill="none">
     <path d="M32 4C20 3 8 8 4 18" stroke="#8B98A5" stroke-width="1.2" stroke-dasharray="4 4" stroke-linecap="round"/>
     <path d="M3 21l-1-7 8 3" stroke="#8B98A5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
-  <button id="notaTipFechar">arraste a régua<br>e meça as peças</button>
+  <button id="notaTipFechar" tabindex="-1">arraste a régua<br>e meça as peças</button>
 </div>
 
 <div class="cal-panel" id="calPanel" hidden>
@@ -75,7 +102,7 @@
   </div>
 </div>
 
-<div class="progresso" id="progresso"></div>
+<div class="progresso" id="progresso" aria-hidden="true"></div>
 
 <!-- ============ HEADER ============ -->
 <header class="topo">
@@ -88,7 +115,7 @@
   </nav>
 </header>
 
-<main>
+<main id="conteudo">
 <!-- ============ HERO ============ -->
 <section class="hero wrap">
   <div class="hero-grid">
@@ -96,34 +123,13 @@
       <div class="selo">[ ESC 1:1 · FOLHA A3 · MR-MAX-001 ]</div>
       <h1>
         <span class="titulo" id="titulo">
-          <span class="titulo-linha">
-            <span class="base">Tudo que falta</span>
-            <span class="camada camada-azul" aria-hidden="true">Tudo que falta</span>
-            <span class="camada camada-cinza" aria-hidden="true">Tudo que falta</span>
-            <span class="camada camada-branca" aria-hidden="true">Tudo que falta</span>
-          </span>
-          <span class="titulo-linha">
-            <span class="base">na sua casa</span>
-            <span class="camada camada-azul" aria-hidden="true">na sua casa</span>
-            <span class="camada camada-cinza" aria-hidden="true">na sua casa</span>
-            <span class="camada camada-branca" aria-hidden="true">na sua casa</span>
-          </span>
-          <span class="titulo-linha">
-            <span class="base">cabe na mesa</span>
-            <span class="camada camada-azul" aria-hidden="true">cabe na mesa</span>
-            <span class="camada camada-cinza" aria-hidden="true">cabe na mesa</span>
-            <span class="camada camada-branca" aria-hidden="true">cabe na mesa</span>
-          </span>
-          <span class="titulo-linha">
-            <span class="base">de impressão.</span>
-            <span class="camada camada-azul" aria-hidden="true">de impressão.</span>
-            <span class="camada camada-cinza" aria-hidden="true">de impressão.</span>
-            <span class="camada camada-branca" aria-hidden="true">de impressão.</span>
-          </span>
+          <span class="titulo-linha"><span class="base">Tudo que falta</span></span>
+          <span class="titulo-linha"><span class="base">na sua casa</span></span>
+          <span class="titulo-linha"><span class="base">cabe na mesa</span></span>
+          <span class="titulo-linha"><span class="base">de impressão.</span></span>
           <span class="gantry-x" id="gantryX" aria-hidden="true"></span>
           <span class="gantry-y" id="gantryY" aria-hidden="true"></span>
           <span class="bico" id="bicoTitulo" aria-hidden="true"></span>
-          <span class="eixos" aria-hidden="true">X / Y</span>
         </span>
       </h1>
       <p class="lead">Brinquedos que aguentam criança, objetos que resolvem a casa e aquela peça que ninguém mais fabrica. Impressa, lixada e conferida à mão — uma a uma.</p>
@@ -195,54 +201,54 @@
 
   <div class="pecas-grid">
     <div class="pecas-lista" id="pecasLista">
-      <div class="peca is-ativa" data-i="0">
+      <button type="button" class="peca is-ativa" data-i="0" aria-pressed="true">
         <span class="peca-num">001</span>
         <div>
           <div class="peca-nome">Dragão articulado</div>
           <div class="peca-desc">38 elos móveis, sai da mesa já montado</div>
         </div>
         <span class="peca-cat">BRINQUEDOS</span>
-      </div>
-      <div class="peca" data-i="1">
+      </button>
+      <button type="button" class="peca" data-i="1" aria-pressed="false">
         <span class="peca-num">002</span>
         <div>
           <div class="peca-nome">Vaso espiral</div>
           <div class="peca-desc">Parede única, 18 cm, à prova d'água</div>
         </div>
         <span class="peca-cat">CASA</span>
-      </div>
-      <div class="peca" data-i="2">
+      </button>
+      <button type="button" class="peca" data-i="2" aria-pressed="false">
         <span class="peca-num">003</span>
         <div>
           <div class="peca-nome">Organizador de gaveta</div>
           <div class="peca-desc">Modular, encaixa na medida da sua gaveta</div>
         </div>
         <span class="peca-cat">PRATICIDADE</span>
-      </div>
-      <div class="peca" data-i="3">
+      </button>
+      <button type="button" class="peca" data-i="3" aria-pressed="false">
         <span class="peca-num">004</span>
         <div>
           <div class="peca-nome">Luminária lua</div>
           <div class="peca-desc">Textura de crateras, LED morno incluso</div>
         </div>
         <span class="peca-cat">CASA</span>
-      </div>
-      <div class="peca" data-i="4">
+      </button>
+      <button type="button" class="peca" data-i="4" aria-pressed="false">
         <span class="peca-num">005</span>
         <div>
           <div class="peca-nome">Quebra-cabeça 3D</div>
           <div class="peca-desc">12 peças em PLA colorido, sem cola</div>
         </div>
         <span class="peca-cat">BRINQUEDOS</span>
-      </div>
-      <div class="peca" data-i="5">
+      </button>
+      <button type="button" class="peca" data-i="5" aria-pressed="false">
         <span class="peca-num">006</span>
         <div>
           <div class="peca-nome">Peça de reposição</div>
           <div class="peca-desc">Aquela que quebrou e não se fabrica mais</div>
         </div>
         <span class="peca-cat">PRATICIDADE</span>
-      </div>
+      </button>
     </div>
 
     <div class="pecas-preview">
@@ -254,7 +260,7 @@
         <div class="quadro" data-i="4"><figure class="slot"><span class="slot-txt">Quebra-cabeça 3D</span></figure></div>
         <div class="quadro" data-i="5"><figure class="slot"><span class="slot-txt">Peça de reposição</span></figure></div>
       </div>
-      <div class="preview-rodape">
+      <div class="preview-rodape" aria-live="polite">
         <span id="pecaContador">001 / 006</span>
         <span id="pecaAtiva">Dragão articulado</span>
       </div>
@@ -346,8 +352,8 @@
 <!-- ============ ASSINATURA ============ -->
 <section class="assinatura">
   <div class="logo-print" id="logoPrint">
-    <img class="fantasma" src="assets/logo-mrmax.jpeg" alt="MR Max Elegance">
-    <img class="impressa" src="assets/logo-mrmax.jpeg" alt="" aria-hidden="true">
+    <img class="fantasma" src="assets/logo-mrmax.jpeg" alt="Logotipo MR MAX ELEGANCE" width="500" height="500" loading="lazy" decoding="async">
+    <img class="impressa" src="assets/logo-mrmax.jpeg" alt="" aria-hidden="true" width="500" height="500" loading="lazy" decoding="async">
     <div class="listras"></div>
     <div class="cabecote"></div>
     <div class="mesa"></div>

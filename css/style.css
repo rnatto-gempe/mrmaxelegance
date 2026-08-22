@@ -241,6 +241,9 @@ body {
 
 /* Brand Title Header styled exactly like "- MR MAX - / - ELEGANCE -" */
 .brand-title-wrap {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -639,12 +642,16 @@ body {
   z-index: 100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  /* fechado sai também da leitura de tela e da ordem de tabulação */
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
 
 .modal-backdrop.active {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.25s ease, visibility 0s;
 }
 
 .modal-box {

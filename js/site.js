@@ -155,7 +155,10 @@
   const totalPecas = String(pecas.length).padStart(3, '0');
 
   function ativarPeca(i) {
-    pecas.forEach((p, k) => p.classList.toggle('is-ativa', k === i));
+    pecas.forEach((p, k) => {
+      p.classList.toggle('is-ativa', k === i);
+      p.setAttribute('aria-pressed', k === i ? 'true' : 'false');
+    });
     quadros.forEach((q, k) => q.classList.toggle('is-ativa', k === i));
     const alvo = pecas[i];
     if (!alvo) return;
@@ -166,7 +169,6 @@
     p.addEventListener('mouseenter', () => ativarPeca(i));
     p.addEventListener('click', () => ativarPeca(i));
     p.addEventListener('focus', () => ativarPeca(i));
-    p.setAttribute('tabindex', '0');
   });
 
   /* ==========================================================
@@ -196,11 +198,30 @@
   const gantryY = $('#gantryY');
   const bico    = $('#bicoTitulo');
   const bases   = $$('.titulo-linha .base');
-  const camadas = {
-    azul:   $$('.camada-azul'),
-    cinza:  $$('.camada-cinza'),
-    branca: $$('.camada-branca')
-  };
+  const camadas = { azul: [], cinza: [], branca: [] };
+
+  /* As três demãos de cor são cópias do texto empilhadas sobre ele. Ficam
+     fora do HTML de propósito: assim a página entregue tem o título uma vez
+     só — o que buscadores leem — e as cópias, que são enfeite, nascem aqui. */
+  function montarCamadas() {
+    const cores = [['azul', 'camada-azul'], ['cinza', 'camada-cinza'], ['branca', 'camada-branca']];
+    bases.forEach((base) => {
+      const linha = base.parentNode;
+      cores.forEach((par) => {
+        const el = document.createElement('span');
+        el.className = 'camada ' + par[1];
+        el.setAttribute('aria-hidden', 'true');
+        el.textContent = base.textContent;
+        linha.appendChild(el);
+        camadas[par[0]].push(el);
+      });
+    });
+    const eixos = document.createElement('span');
+    eixos.className = 'eixos';
+    eixos.setAttribute('aria-hidden', 'true');
+    eixos.textContent = 'X / Y';
+    titulo && titulo.appendChild(eixos);
+  }
   let animacoes = [];
   let geometria = '';   /* impressão digital do layout do título */
 
@@ -454,6 +475,7 @@
   }
 
   function iniciar() {
+    montarCamadas();
     aplicarPpcm();
     ativarPeca(0);
     atualizarProgresso();

@@ -18,6 +18,9 @@ mrmaxelegance/
 ├── index.html          # home (design v2)
 ├── links.html          # bio links
 ├── lp.html             # landing 3D anterior
+├── 404.html            # página de erro na identidade da marca
+├── robots.txt          # libera a indexação e aponta o sitemap
+├── sitemap.xml         # mapa das páginas para os buscadores
 ├── css/
 │   ├── site.css        # estilos da home
 │   ├── style.css       # estilos da bio links
@@ -27,8 +30,26 @@ mrmaxelegance/
 │   ├── app.js          # bio links + analytics
 │   ├── config.js       # links, contatos e chaves de analytics
 │   └── lp.js           # motor de scrollytelling da lp.html
-└── assets/             # logo, avatar e vídeo
+└── assets/
+    ├── logo-mrmax.jpeg # logotipo (500×500)
+    ├── og.jpg          # imagem de compartilhamento (1200×630)
+    ├── icone-32.png    # favicon
+    ├── icone-180.png   # ícone de tela de início do iOS
+    ├── avatar.webp     # avatar da bio links (9 KB)
+    ├── avatar.png      # mesmo avatar, para navegadores sem WebP
+    └── materialization.mp4
 ```
+
+## Trocando para um domínio próprio
+
+O endereço aparece em lugares que os buscadores leem, e todos precisam mudar juntos:
+
+1. `CNAME` na raiz do repositório com o domínio (ex.: `www.mrmaxelegance.com.br`)
+2. DNS do domínio apontando para o GitHub Pages (CNAME para `rnatto-gempe.github.io`)
+3. `<link rel="canonical">`, `og:url` e `og:image` em `index.html` e `links.html`
+4. Os três `<loc>` do `sitemap.xml` e a linha `Sitemap:` do `robots.txt`
+5. `url`, `image` e `logo` no bloco JSON-LD de `index.html`
+6. `homeUrl` e `share.url` em `js/config.js`
 
 ## Publicando fotos das peças
 
