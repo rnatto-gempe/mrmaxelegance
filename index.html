@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MR MAX ELEGANCE | Impressão 3D sob medida em Londrina</title>
+<meta name="description" content="Brinquedos que aguentam criança, objetos que resolvem a casa e aquela peça que ninguém mais fabrica. Impressão 3D em PLA, PETG, TPU e resina — impressa, lixada e conferida à mão. Orçamento no WhatsApp (43) 99607-0804.">
+<meta name="theme-color" content="#05070A">
+<link rel="canonical" href="https://rnatto-gempe.github.io/mrmaxelegance/">
+<link rel="icon" href="assets/logo-mrmax.jpeg">
+<link rel="apple-touch-icon" href="assets/logo-mrmax.jpeg">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MR MAX ELEGANCE">
+<meta property="og:title" content="MR MAX ELEGANCE | Impressões que transformam">
+<meta property="og:description" content="Tudo que falta na sua casa cabe na mesa de impressão. Peças sob medida, impressas e acabadas à mão.">
+<meta property="og:image" content="assets/logo-mrmax.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Caveat:wght@500;600&family=Sora:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "MR MAX ELEGANCE",
+  "description": "Impressão 3D sob medida: brinquedos, objetos de casa e peças de reposição.",
+  "image": "assets/logo-mrmax.jpeg",
+  "telephone": "+5543996070804",
+  "email": "contato@mrmaxelegance.com.br",
+  "priceRange": "$$",
+  "openingHours": "Mo-Sa 09:00-19:00",
+  "sameAs": ["https://www.instagram.com/rmmax.elegance/", "https://wa.me/5543996070804"]
+}
+</script>
+</head>
+<body>
+
+<!-- ============ RÉGUA LATERAL ============ -->
+<div class="ruler" id="ruler" title="Arraste (mouse ou toque) para medir"></div>
+<button class="ruler-reset" id="rulerReset" title="Voltar a régua ao lugar" aria-label="Voltar a régua ao lugar">↺</button>
+<span class="ruler-badge" id="rulerBadge">ARRASTE PARA MEDIR</span>
+
+<div class="cal-corner">
+  <button class="cal-btn" id="calBtn" title="Calibrar régua">CAL</button>
+</div>
+
+<div class="nota nota-hover" id="notaHover" aria-hidden="true">
+  <svg width="26" height="22" viewBox="0 0 26 22" fill="none">
+    <path d="M24 3C14 3 6 8 3 16" stroke="#4FA3F7" stroke-width="1.2" stroke-dasharray="4 4" stroke-linecap="round"/>
+    <path d="M2 19l-.5-6 6.5 2.5" stroke="#4FA3F7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <p>cm quase reais — arraste pra medir<br><span style="color:#6B7885">exato depois do CAL</span></p>
+</div>
+
+<div class="nota nota-tip" id="notaTip">
+  <svg width="34" height="30" viewBox="0 0 34 30" fill="none">
+    <path d="M32 4C20 3 8 8 4 18" stroke="#8B98A5" stroke-width="1.2" stroke-dasharray="4 4" stroke-linecap="round"/>
+    <path d="M3 21l-1-7 8 3" stroke="#8B98A5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <button id="notaTipFechar">arraste a régua<br>e meça as peças</button>
+</div>
+
+<div class="cal-panel" id="calPanel" hidden>
+  <h3>CALIBRAR RÉGUA</h3>
+  <p>Encoste um cartão de crédito na tela e arraste até a moldura ficar do mesmo tamanho (8,56 cm).</p>
+  <div class="cal-card"></div>
+  <input type="range" id="calRange" min="20" max="80" step="0.1" value="37.8" aria-label="Pixels por centímetro">
+  <div class="cal-foot">
+    <span id="calLabel">37.8 px = 1 cm</span>
+    <button id="calPadrao">PADRÃO</button>
+  </div>
+</div>
+
+<div class="progresso" id="progresso"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="topo">
+  <span class="topo-marca">MR MAX ELEGANCE</span>
+  <nav>
+    <a href="#pecas">01 PEÇAS</a>
+    <a href="#materiais">02 MATERIAIS</a>
+    <a href="#processo">03 PROCESSO</a>
+    <a href="#contato" class="cta">ORÇAMENTO</a>
+  </nav>
+</header>
+
+<main>
+<!-- ============ HERO ============ -->
+<section class="hero wrap">
+  <div class="hero-grid">
+    <div>
+      <div class="selo">[ ESC 1:1 · FOLHA A3 · MR-MAX-001 ]</div>
+      <h1>
+        <span class="titulo" id="titulo">
+          <span class="titulo-linha">
+            <span class="base">Tudo que falta</span>
+            <span class="camada camada-azul" aria-hidden="true">Tudo que falta</span>
+            <span class="camada camada-cinza" aria-hidden="true">Tudo que falta</span>
+            <span class="camada camada-branca" aria-hidden="true">Tudo que falta</span>
+          </span>
+          <span class="titulo-linha">
+            <span class="base">na sua casa</span>
+            <span class="camada camada-azul" aria-hidden="true">na sua casa</span>
+            <span class="camada camada-cinza" aria-hidden="true">na sua casa</span>
+            <span class="camada camada-branca" aria-hidden="true">na sua casa</span>
+          </span>
+          <span class="titulo-linha">
+            <span class="base">cabe na mesa</span>
+            <span class="camada camada-azul" aria-hidden="true">cabe na mesa</span>
+            <span class="camada camada-cinza" aria-hidden="true">cabe na mesa</span>
+            <span class="camada camada-branca" aria-hidden="true">cabe na mesa</span>
+          </span>
+          <span class="titulo-linha">
+            <span class="base">de impressão.</span>
+            <span class="camada camada-azul" aria-hidden="true">de impressão.</span>
+            <span class="camada camada-cinza" aria-hidden="true">de impressão.</span>
+            <span class="camada camada-branca" aria-hidden="true">de impressão.</span>
+          </span>
+          <span class="gantry-x" id="gantryX" aria-hidden="true"></span>
+          <span class="gantry-y" id="gantryY" aria-hidden="true"></span>
+          <span class="bico" id="bicoTitulo" aria-hidden="true"></span>
+          <span class="eixos" aria-hidden="true">X / Y</span>
+        </span>
+      </h1>
+      <p class="lead">Brinquedos que aguentam criança, objetos que resolvem a casa e aquela peça que ninguém mais fabrica. Impressa, lixada e conferida à mão — uma a uma.</p>
+      <div class="botoes">
+        <a href="#pecas" class="btn btn-solido">Ver o que já imprimimos</a>
+        <a href="#contato" class="btn btn-vazado">Mandar minha ideia</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="desenho para" id="desenho">
+        <figure class="slot">
+          <span class="slot-txt">Vista frontal da peça</span>
+        </figure>
+        <span class="canto canto-se"></span>
+        <span class="canto canto-sd"></span>
+        <span class="canto canto-ie"></span>
+        <span class="canto canto-id"></span>
+        <span class="cota-v"></span>
+        <span class="cota-alt" id="cotaAltura">—</span>
+      </div>
+      <div class="legenda">
+        <span>VISTA FRONTAL</span>
+        <span class="azul" id="cotaLargura">—</span>
+        <span>PLA · 0,12 mm</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="faixa">
+    <figure class="slot">
+      <span class="slot-txt">Foto larga — bancada, impressora em ação ou coleção de peças</span>
+    </figure>
+    <div class="faixa-sombra"></div>
+    <div class="faixa-trilho"></div>
+    <div class="faixa-bico"></div>
+    <div class="faixa-specs">
+      <span>BICO 0,4 mm</span>
+      <span>CAMADA 0,12 mm</span>
+      <span>PREENCHIMENTO 40%</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-fita">
+    <span class="item">Brinquedos<span class="ponto"></span></span>
+    <span class="item">Casa<span class="ponto"></span></span>
+    <span class="item">Praticidade<span class="ponto"></span></span>
+    <span class="item">Sob medida<span class="ponto"></span></span>
+    <span class="item">Peças de reposição<span class="ponto"></span></span>
+    <span class="item">Presentes<span class="ponto"></span></span>
+    <span class="item">Brinquedos<span class="ponto"></span></span>
+    <span class="item">Casa<span class="ponto"></span></span>
+    <span class="item">Praticidade<span class="ponto"></span></span>
+    <span class="item">Sob medida<span class="ponto"></span></span>
+    <span class="item">Peças de reposição<span class="ponto"></span></span>
+    <span class="item">Presentes<span class="ponto"></span></span>
+  </div>
+</div>
+
+<!-- ============ PEÇAS ============ -->
+<section id="pecas" class="sec wrap">
+  <div class="sec-cab">
+    <h2 class="h2 rev">Índice de peças</h2>
+    <span class="dica">PASSE O MOUSE PARA VER</span>
+  </div>
+
+  <div class="pecas-grid">
+    <div class="pecas-lista" id="pecasLista">
+      <div class="peca is-ativa" data-i="0">
+        <span class="peca-num">001</span>
+        <div>
+          <div class="peca-nome">Dragão articulado</div>
+          <div class="peca-desc">38 elos móveis, sai da mesa já montado</div>
+        </div>
+        <span class="peca-cat">BRINQUEDOS</span>
+      </div>
+      <div class="peca" data-i="1">
+        <span class="peca-num">002</span>
+        <div>
+          <div class="peca-nome">Vaso espiral</div>
+          <div class="peca-desc">Parede única, 18 cm, à prova d'água</div>
+        </div>
+        <span class="peca-cat">CASA</span>
+      </div>
+      <div class="peca" data-i="2">
+        <span class="peca-num">003</span>
+        <div>
+          <div class="peca-nome">Organizador de gaveta</div>
+          <div class="peca-desc">Modular, encaixa na medida da sua gaveta</div>
+        </div>
+        <span class="peca-cat">PRATICIDADE</span>
+      </div>
+      <div class="peca" data-i="3">
+        <span class="peca-num">004</span>
+        <div>
+          <div class="peca-nome">Luminária lua</div>
+          <div class="peca-desc">Textura de crateras, LED morno incluso</div>
+        </div>
+        <span class="peca-cat">CASA</span>
+      </div>
+      <div class="peca" data-i="4">
+        <span class="peca-num">005</span>
+        <div>
+          <div class="peca-nome">Quebra-cabeça 3D</div>
+          <div class="peca-desc">12 peças em PLA colorido, sem cola</div>
+        </div>
+        <span class="peca-cat">BRINQUEDOS</span>
+      </div>
+      <div class="peca" data-i="5">
+        <span class="peca-num">006</span>
+        <div>
+          <div class="peca-nome">Peça de reposição</div>
+          <div class="peca-desc">Aquela que quebrou e não se fabrica mais</div>
+        </div>
+        <span class="peca-cat">PRATICIDADE</span>
+      </div>
+    </div>
+
+    <div class="pecas-preview">
+      <div class="preview-caixa" id="previewCaixa">
+        <div class="quadro is-ativa" data-i="0"><figure class="slot"><span class="slot-txt">Dragão articulado</span></figure></div>
+        <div class="quadro" data-i="1"><figure class="slot"><span class="slot-txt">Vaso espiral</span></figure></div>
+        <div class="quadro" data-i="2"><figure class="slot"><span class="slot-txt">Organizador de gaveta</span></figure></div>
+        <div class="quadro" data-i="3"><figure class="slot"><span class="slot-txt">Luminária lua</span></figure></div>
+        <div class="quadro" data-i="4"><figure class="slot"><span class="slot-txt">Quebra-cabeça 3D</span></figure></div>
+        <div class="quadro" data-i="5"><figure class="slot"><span class="slot-txt">Peça de reposição</span></figure></div>
+      </div>
+      <div class="preview-rodape">
+        <span id="pecaContador">001 / 006</span>
+        <span id="pecaAtiva">Dragão articulado</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MATERIAIS ============ -->
+<section id="materiais" class="sec wrap">
+  <div class="mat-grid">
+    <div class="mat-intro">
+      <h2 class="h2 rev">Ficha<br>técnica</h2>
+      <p>Escolhemos o filamento pelo uso da peça, não pelo estoque. Se ela vai apanhar, sai em PETG.</p>
+    </div>
+    <div>
+      <div class="material rev-sm">
+        <div class="material-nome">PLA</div>
+        <div class="material-uso">Decoração, brinquedos, protótipos</div>
+        <div class="material-spec">RÍGIDO · 200 °C · FOSCO</div>
+        <div class="barra"><i style="width:92%"></i></div>
+      </div>
+      <div class="material rev-sm">
+        <div class="material-nome">PETG</div>
+        <div class="material-uso">Peças que apanham, uso externo</div>
+        <div class="material-spec">RESISTENTE · 240 °C · BRILHO</div>
+        <div class="barra"><i style="width:78%"></i></div>
+      </div>
+      <div class="material rev-sm">
+        <div class="material-nome">TPU</div>
+        <div class="material-uso">Flexíveis, capas, pés antiderrapantes</div>
+        <div class="material-spec">FLEXÍVEL · 225 °C · 95A</div>
+        <div class="barra"><i style="width:54%"></i></div>
+      </div>
+      <div class="material rev-sm">
+        <div class="material-nome">RESINA</div>
+        <div class="material-uso">Miniaturas e detalhe fino</div>
+        <div class="material-spec">DETALHE · 0,025 mm · UV</div>
+        <div class="barra"><i style="width:66%"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROCESSO ============ -->
+<section id="processo" class="sec wrap">
+  <h2 class="h2 rev" style="margin-bottom:48px">Como a peça nasce</h2>
+  <div class="passos">
+    <div class="passo rev-sm">
+      <div class="passo-num">01</div>
+      <h3>A ideia</h3>
+      <p>Foto, print, rabisco ou STL pronto. O que você tiver já serve.</p>
+    </div>
+    <div class="passo rev-sm">
+      <div class="passo-num">02</div>
+      <h3>Orçamento</h3>
+      <p>Valor, material sugerido e prazo em até 2 horas úteis.</p>
+    </div>
+    <div class="passo rev-sm">
+      <div class="passo-num">03</div>
+      <h3>Impressão</h3>
+      <p>Camada de 0,12 mm e acabamento manual em cada peça.</p>
+    </div>
+    <div class="passo rev-sm">
+      <div class="passo-num">04</div>
+      <h3>Entrega</h3>
+      <p>Retirada combinada ou envio para todo o Brasil.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALERIA ============ -->
+<section class="sec">
+  <div class="galeria rev">
+    <div class="largo"><figure class="slot"><span class="slot-txt">Peça em destaque</span></figure></div>
+    <div><figure class="slot"><span class="slot-txt">Detalhe</span></figure></div>
+    <div><figure class="slot"><span class="slot-txt">Peça</span></figure></div>
+    <div class="frase"><span>Feito<br>à mão,<br>peça a peça</span></div>
+    <div><figure class="slot"><span class="slot-txt">Detalhe da impressão</span></figure></div>
+    <div><figure class="slot"><span class="slot-txt">Peça na casa</span></figure></div>
+    <div><figure class="slot"><span class="slot-txt">Bancada</span></figure></div>
+    <div><figure class="slot"><span class="slot-txt">Peça</span></figure></div>
+    <div class="numero">
+      <b>1.200+</b>
+      <span>PEÇAS ENTREGUES</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ASSINATURA ============ -->
+<section class="assinatura">
+  <div class="logo-print" id="logoPrint">
+    <img class="fantasma" src="assets/logo-mrmax.jpeg" alt="MR Max Elegance">
+    <img class="impressa" src="assets/logo-mrmax.jpeg" alt="" aria-hidden="true">
+    <div class="listras"></div>
+    <div class="cabecote"></div>
+    <div class="mesa"></div>
+    <span class="concluido">IMPRESSÃO CONCLUÍDA · 100%</span>
+  </div>
+  <div class="slogan">
+    <i></i>
+    <span class="wipe">IMPRESSÕES QUE TRANSFORMAM · QUALIDADE QUE ENCANTA</span>
+    <i></i>
+  </div>
+</section>
+
+<!-- ============ CONTATO ============ -->
+<section id="contato" class="contato">
+  <div class="contato-grid">
+    <div>
+      <h2 class="rev">Faça sua<br>encomenda.</h2>
+      <p class="lead">Um brinquedo, uma peça da casa, um encaixe que quebrou. Descreva em uma frase — a gente resolve o resto.</p>
+      <div class="contato-acoes">
+        <a class="zap" href="https://wa.me/5543996070804" target="_blank" rel="noopener">
+          <span class="zap-txt">
+            <small>RESPOSTA EM ATÉ 2H ÚTEIS</small>
+            <strong>Chamar no WhatsApp</strong>
+          </span>
+          <span class="zap-seta">→</span>
+        </a>
+        <a class="link-secundario" href="https://www.instagram.com/rmmax.elegance/" target="_blank" rel="noopener">OU VER O INSTAGRAM @RMMAX.ELEGANCE</a>
+      </div>
+    </div>
+    <div>
+      <div class="contato-linha">
+        <span>WHATSAPP</span>
+        <a href="https://wa.me/5543996070804" target="_blank" rel="noopener">(43) 99607-0804</a>
+      </div>
+      <div class="contato-linha">
+        <span>INSTAGRAM</span>
+        <a href="https://www.instagram.com/rmmax.elegance/" target="_blank" rel="noopener">@rmmax.elegance</a>
+      </div>
+      <div class="contato-linha">
+        <span>E-MAIL</span>
+        <a href="mailto:contato@mrmaxelegance.com.br">contato@mrmaxelegance.com.br</a>
+      </div>
+      <div class="contato-linha">
+        <span>TODOS OS LINKS</span>
+        <a href="links.html">mrmaxelegance /links</a>
+      </div>
+      <div class="contato-linha">
+        <span>ATENDIMENTO</span>
+        <span>SEG–SÁB · 9H–19H</span>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="rodape">
+  <span>MR MAX ELEGANCE · IMPRESSÕES QUE TRANSFORMAM</span>
+  <button id="eggBtn" title="clique">RÉGUA CALIBRADA EM <span id="eggPpcm">37.8</span> PX/CM</button>
+</footer>
+
+<div class="segredo" id="egg" hidden>
+  <div>
+    <svg width="30" height="26" viewBox="0 0 30 26" fill="none">
+      <path d="M2 22C6 10 16 4 28 3" stroke="#4FA3F7" stroke-width="1.2" stroke-dasharray="4 4" stroke-linecap="round"/>
+      <path d="M22 1l7 2-4 6" stroke="#4FA3F7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p>psst — os centímetros desta página são de verdade (ou quase): a régua usa a densidade de pixels da sua tela, então uma peça de 8 cm aparece com 8 cm aqui. Ajuste no CAL com um cartão e fica exato.</p>
+  </div>
+</div>
+
+<script src="js/site.js"></script>
+</body>
+</html>

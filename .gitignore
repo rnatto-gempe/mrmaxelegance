@@ -1,0 +1,12 @@
+# Ferramenta interna de pesquisa — NÃO publicar
+# (contém perfil do Chrome com sessão do WhatsApp Web, chats e ~380 MB de dados)
+radar/
+
+# Sistema / editor
+.DS_Store
+.playwright-mcp/
+*.log
+
+# Ambientes
+.venv/
+node_modules/
