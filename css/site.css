@@ -553,37 +553,6 @@ a:hover { color: var(--azul-pale); }
 }
 
 /* ============================================================
-   MATERIAIS
-   ============================================================ */
-.mat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: clamp(24px, 3.5vw, 40px);
-  align-items: start;
-}
-.mat-grid > div { min-width: 0; }
-.mat-intro h2 { line-height: .95; margin-bottom: 16px; }
-.mat-intro p { margin: 0; font-size: 16px; line-height: 1.6; color: var(--cinza-2); font-weight: 300; max-width: 340px; }
-.material {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
-  gap: 16px;
-  align-items: center;
-  padding: 24px 0;
-  border-top: 1px solid rgba(255, 255, 255, .12);
-}
-.material-nome {
-  font-family: var(--display);
-  font-variation-settings: 'wdth' 112, 'wght' 700;
-  font-size: 24px;
-  text-transform: uppercase;
-}
-.material-uso { font-size: 14px; color: var(--cinza-1); font-weight: 300; }
-.material-spec { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: var(--cinza-3); }
-.barra { height: 6px; background: rgba(255, 255, 255, .1); }
-.barra i { display: block; height: 100%; background: var(--azul); transform-origin: 0 50%; }
-
-/* ============================================================
    PROCESSO
    ============================================================ */
 .passos {
@@ -780,7 +749,19 @@ a:hover { color: var(--azul-pale); }
    PLACEHOLDER DE FOTO — moldura técnica enquanto não há imagem
    Para publicar uma foto: <img> dentro da figure (ver README)
    ============================================================ */
+/* O espaço de foto. Sem foto, a hachura azul segura o lugar. Com foto, o
+   fundo vira o preenchimento de impressão tirado da cor da própria peça —
+   o mesmo desenho do catálogo, e pela mesma razão: a peça chega recortada,
+   então ela aparece inteira (`contain`) e o fundo preenche o resto, seja
+   qual for a largura da tela. */
 .slot {
+  --h: 209;
+  --fundo: hsl(var(--h) 40% 8%);
+  --topo:  hsl(calc(var(--h) + 16) 34% 16%);
+  --traco: hsl(var(--h) 45% 58% / .2);
+  --passo: 22px;
+  --desenho: none;
+
   position: relative;
   margin: 0;
   width: 100%; height: 100%;
@@ -790,7 +771,36 @@ a:hover { color: var(--azul-pale); }
     repeating-linear-gradient(135deg, rgba(79,163,247,.05) 0 1px, transparent 1px 9px);
   display: flex; align-items: center; justify-content: center;
 }
-.slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slot:has(img) {
+  background-color: var(--fundo);
+  background-image: var(--desenho), linear-gradient(155deg, var(--topo), var(--fundo) 74%);
+}
+.slot img {
+  width: 100%; height: 100%;
+  padding: 6% 6% 7%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 14px 26px rgba(0, 0, 0, .5));
+}
+
+/* os mesmos seis desenhos do catálogo */
+.slot.p0 { --desenho: repeating-linear-gradient(45deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.slot.p1 { --desenho:
+  repeating-linear-gradient(0deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(90deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.slot.p2 { --desenho:
+  repeating-linear-gradient(45deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(-45deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.slot.p3 { --desenho:
+  repeating-linear-gradient(0deg,   var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(60deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(120deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.slot.p4 { --desenho: repeating-radial-gradient(circle at 50% 58%,
+  var(--traco) 0 1px, transparent 1px calc(var(--passo) + 4px)); }
+.slot.p5 { --desenho:
+  repeating-linear-gradient(30deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(150deg, var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(90deg,  var(--traco) 0 1px, transparent 1px calc(var(--passo) * 2)); }
 .slot img + .slot-txt { display: none; }
 .slot-txt {
   display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -829,7 +839,6 @@ a:hover { color: var(--azul-pale); }
 .para.visivel { opacity: 1; transform: translateY(0) scale(1); }
 
 .barra i { transform: scaleX(0); transition: transform 1s cubic-bezier(.16,.84,.44,1); }
-.material.visivel .barra i { transform: scaleX(1); }
 
 .slogan span.wipe { clip-path: inset(0 100% 0 0); transition: clip-path 1s ease; }
 .slogan.visivel span.wipe { clip-path: inset(0 0 0 0); }
@@ -852,9 +861,33 @@ a:hover { color: var(--azul-pale); }
    ============================================================ */
 @media (max-width: 860px) {
   .topo { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .topo nav { gap: 16px; font-size: 10px; }
+  .topo nav { gap: 16px; font-size: 10px; flex-wrap: wrap; }
   .pecas-preview { position: static; }
   .nota { display: none; }
+}
+
+/* Num telefone o topo empilhava em duas linhas e cobria o começo da seção
+   logo abaixo. As âncoras internas saem — quem está no telefone rola, não
+   navega por índice — e ficam os dois botões, que são o que se aperta. */
+@media (max-width: 700px) {
+  .topo { flex-direction: row; align-items: center; gap: 10px; padding: 10px 14px; }
+  .topo nav { gap: 8px; margin-left: auto; flex-wrap: nowrap; }
+  .topo nav > a:not(.cta) { display: none; }
+  .topo nav .cta {
+    padding: 0 13px;
+    height: 36px;
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    white-space: nowrap;
+  }
+  .topo nav .cta-catalogo .cta-n { display: none; }
+  .topo-marca { font-size: 9px; letter-spacing: .14em; white-space: nowrap; }
+}
+
+/* Abaixo disto a marca escrita não cabe junto dos dois botões. Ela sai: o
+   logo já está no topo da página e o nome volta no rodapé. */
+@media (max-width: 400px) {
+  .topo-marca { display: none; }
 }
 
 @media (max-width: 560px) {
@@ -1060,3 +1093,184 @@ a:hover { color: var(--azul-pale); }
 .amostra-parede { border: 2px solid rgba(191, 224, 255, .9); }
 .amostra-feito  { background: var(--azul); }
 .amostra-solto  { border-top: 3px solid #E8613A; height: 3px; align-self: center; }
+
+/* ============================================================
+   CHAMADA DO CATÁLOGO
+   O índice acima mostra seis peças. Esta faixa avisa que existem
+   milhares e leva para a página de pedido.
+   ============================================================ */
+.chamada-catalogo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(18px, 3vw, 40px);
+  margin-top: clamp(34px, 4.5vw, 56px);
+  padding: clamp(22px, 3vw, 34px) clamp(22px, 3.4vw, 40px);
+  border: 1px solid rgba(79, 163, 247, .3);
+  background:
+    linear-gradient(135deg, rgba(30, 123, 232, .10), transparent 62%),
+    repeating-linear-gradient(45deg, rgba(79, 163, 247, .05) 0 1px, transparent 1px 11px),
+    var(--preto-2);
+}
+.chamada-txt { flex: 1 1 320px; min-width: 0; }
+.chamada-selo {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 10px;
+  letter-spacing: .22em;
+  color: var(--azul-claro);
+}
+.chamada-frase {
+  margin: 0;
+  max-width: 56ch;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.55;
+  color: var(--cinza-1);
+}
+.chamada-frase strong { color: var(--branco); font-weight: 600; }
+.chamada-catalogo .btn { flex-shrink: 0; gap: 10px; }
+.chamada-catalogo .btn svg { width: 17px; height: 17px; }
+.chamada-catalogo .btn:hover svg { transform: translateX(3px); transition: transform .18s; }
+
+/* Os dois botões do topo levam a lugares diferentes e por isso não podem
+   ter o mesmo peso: ORÇAMENTO é sólido, para quem já sabe o que quer;
+   CATÁLOGO é vazado, para quem veio olhar. O número junto do rótulo é o
+   argumento inteiro em quatro dígitos. */
+.topo nav .cta-catalogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(79, 163, 247, .5);
+  color: var(--branco);
+}
+.topo nav .cta-catalogo:hover {
+  background: rgba(30, 123, 232, .16);
+  border-color: var(--azul-claro);
+  color: #fff;
+}
+.topo nav .cta-catalogo .cta-n {
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--azul-claro);
+}
+.topo nav .cta-catalogo:hover .cta-n { color: var(--azul-pale); }
+
+/* ============================================================
+   FAIXA DO CATÁLOGO
+
+   O segundo caminho para o catálogo, no meio da rolagem. A fita não é
+   enfeite: ela é o argumento. Doze peças passando dizem "tem muita
+   coisa" melhor do que qualquer frase que se escreva aqui.
+   ============================================================ */
+
+.catalogo-faixa {
+  position: relative;
+  padding: clamp(56px, 8vw, 104px) 0 clamp(44px, 6vw, 76px);
+  overflow: hidden;
+  border-top: 1px solid rgba(79, 163, 247, .16);
+  border-bottom: 1px solid rgba(79, 163, 247, .16);
+  background:
+    radial-gradient(120% 90% at 8% 0%, rgba(30, 123, 232, .13), transparent 62%),
+    var(--preto-2);
+}
+
+.catalogo-txt {
+  padding: 0 clamp(18px, 3.2vw, 40px);
+  max-width: 1680px;
+  margin: 0 auto clamp(34px, 4.5vw, 54px);
+}
+.catalogo-selo {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 10px;
+  letter-spacing: .22em;
+  color: var(--azul-claro);
+}
+.catalogo-faixa h2 { margin-bottom: 18px; }
+.catalogo-txt p {
+  margin: 0 0 28px;
+  max-width: 46ch;
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.6;
+  color: var(--cinza-1);
+}
+.catalogo-txt .btn { gap: 10px; }
+.catalogo-txt .btn svg { width: 17px; height: 17px; transition: transform .18s; }
+.catalogo-txt .btn:hover svg { transform: translateX(3px); }
+
+/* ---------- a fita ---------- */
+
+.fita {
+  position: relative;
+  /* as pontas somem em vez de cortar no meio de uma peça */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.fita-trilho {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: max-content;
+  animation: mmFita 64s linear infinite;
+}
+.catalogo-faixa:hover .fita-trilho { animation-play-state: paused; }
+
+@keyframes mmFita {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.fita-peca {
+  --h: 209;
+  --fundo: hsl(var(--h) 40% 8%);
+  --topo:  hsl(calc(var(--h) + 16) 34% 16%);
+  --traco: hsl(var(--h) 45% 58% / .2);
+  --passo: 15px;
+  --desenho: none;
+
+  flex: 0 0 auto;
+  width: clamp(150px, 15vw, 210px);
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--fundo);
+  background-image: var(--desenho), linear-gradient(155deg, var(--topo), var(--fundo) 74%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
+}
+.fita-peca img {
+  width: 100%;
+  height: 100%;
+  padding: 11%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, .45));
+}
+
+/* os mesmos seis preenchimentos do catálogo */
+.fita-peca.p0 { --desenho: repeating-linear-gradient(45deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.fita-peca.p1 { --desenho:
+  repeating-linear-gradient(0deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(90deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.fita-peca.p2 { --desenho:
+  repeating-linear-gradient(45deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(-45deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.fita-peca.p3 { --desenho:
+  repeating-linear-gradient(0deg,   var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(60deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(120deg, var(--traco) 0 1px, transparent 1px var(--passo)); }
+.fita-peca.p4 { --desenho: repeating-radial-gradient(circle at 50% 58%,
+  var(--traco) 0 1px, transparent 1px calc(var(--passo) + 4px)); }
+.fita-peca.p5 { --desenho:
+  repeating-linear-gradient(30deg,  var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(150deg, var(--traco) 0 1px, transparent 1px var(--passo)),
+  repeating-linear-gradient(90deg,  var(--traco) 0 1px, transparent 1px calc(var(--passo) * 2)); }
+
+/* quem pediu menos movimento vê a fita parada, e não uma fita ausente */
+@media (prefers-reduced-motion: reduce) {
+  .fita-trilho { animation: none; }
+  .fita { overflow-x: auto; }
+}

@@ -29,8 +29,8 @@
 <link rel="preload" href="assets/fontes/archivo.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fontes/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fontes/space-mono.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/fontes.css?v=20260822b">
-<link rel="stylesheet" href="css/site.css?v=20260822b">
+<link rel="stylesheet" href="css/fontes.css?v=20260829d">
+<link rel="stylesheet" href="css/site.css?v=20260829d">
 
 <script type="application/ld+json">
 {
@@ -110,9 +110,12 @@
   <span class="topo-marca">MR MAX ELEGANCE</span>
   <nav>
     <a href="#pecas">01 PEÇAS</a>
-    <a href="#materiais">02 MATERIAIS</a>
-    <a href="#processo">03 PROCESSO</a>
-    <a href="#mesa-de-teste">04 MESA</a>
+    <a href="#processo">02 PROCESSO</a>
+    <a href="#mesa-de-teste">03 MESA</a>
+    <a href="catalogo.html" class="cta cta-catalogo" rel="nofollow">
+      CATÁLOGO
+      <span class="cta-n mono">4.224</span>
+    </a>
     <a href="#contato" class="cta">ORÇAMENTO</a>
   </nav>
 </header>
@@ -143,7 +146,8 @@
 
     <div>
       <div class="desenho para" id="desenho">
-        <figure class="slot">
+        <figure class="slot p4" style="--h:216">
+          <img src="assets/home-hero.webp" alt="Luminária de mesa impressa em 3D, vista frontal" width="747" height="847" loading="eager" decoding="async">
           <span class="slot-txt">Vista frontal da peça</span>
         </figure>
         <span class="canto canto-se"></span>
@@ -255,12 +259,12 @@
 
     <div class="pecas-preview">
       <div class="preview-caixa" id="previewCaixa">
-        <div class="quadro is-ativa" data-i="0"><figure class="slot"><span class="slot-txt">Dragão articulado</span></figure></div>
-        <div class="quadro" data-i="1"><figure class="slot"><span class="slot-txt">Vaso espiral</span></figure></div>
-        <div class="quadro" data-i="2"><figure class="slot"><span class="slot-txt">Organizador de gaveta</span></figure></div>
-        <div class="quadro" data-i="3"><figure class="slot"><span class="slot-txt">Luminária lua</span></figure></div>
-        <div class="quadro" data-i="4"><figure class="slot"><span class="slot-txt">Quebra-cabeça 3D</span></figure></div>
-        <div class="quadro" data-i="5"><figure class="slot"><span class="slot-txt">Peça de reposição</span></figure></div>
+        <div class="quadro is-ativa" data-i="0"><figure class="slot p5" style="--h:150"><img src="assets/peca-dragao.webp" alt="Dragão articulado impressa em 3D" width="879" height="793" loading="eager" decoding="async"><span class="slot-txt">Dragão articulado</span></figure></div>
+        <div class="quadro" data-i="1"><figure class="slot p5" style="--h:209"><img src="assets/peca-vaso.webp" alt="Vaso espiral impressa em 3D" width="365" height="900" loading="lazy" decoding="async"><span class="slot-txt">Vaso espiral</span></figure></div>
+        <div class="quadro" data-i="2"><figure class="slot p4" style="--h:199"><img src="assets/peca-organizador.webp" alt="Organizador de gaveta impressa em 3D" width="747" height="680" loading="lazy" decoding="async"><span class="slot-txt">Organizador de gaveta</span></figure></div>
+        <div class="quadro" data-i="3"><figure class="slot p0" style="--h:241"><img src="assets/peca-luminaria.webp" alt="Luminária lua impressa em 3D" width="835" height="899" loading="lazy" decoding="async"><span class="slot-txt">Luminária lua</span></figure></div>
+        <div class="quadro" data-i="4"><figure class="slot p3" style="--h:12"><img src="assets/peca-puzzle.webp" alt="Quebra-cabeça 3D impressa em 3D" width="582" height="818" loading="lazy" decoding="async"><span class="slot-txt">Quebra-cabeça 3D</span></figure></div>
+        <div class="quadro" data-i="5"><figure class="slot p2" style="--h:353"><img src="assets/peca-engrenagem.webp" alt="Peça de reposição impressa em 3D" width="827" height="874" loading="lazy" decoding="async"><span class="slot-txt">Peça de reposição</span></figure></div>
       </div>
       <div class="preview-rodape" aria-live="polite">
         <span id="pecaContador">001 / 006</span>
@@ -268,42 +272,21 @@
       </div>
     </div>
   </div>
-</section>
 
-<!-- ============ MATERIAIS ============ -->
-<section id="materiais" class="sec wrap">
-  <div class="mat-grid">
-    <div class="mat-intro">
-      <h2 class="h2 rev">Ficha<br>técnica</h2>
-      <p>Escolhemos o filamento pelo uso da peça, não pelo estoque. Se ela vai apanhar, sai em PETG.</p>
+  <!-- Estas seis são só a amostra. O catálogo inteiro fica em outra página. -->
+  <aside class="chamada-catalogo rev-sm">
+    <div class="chamada-txt">
+      <span class="chamada-selo mono">CATÁLOGO COMPLETO</span>
+      <p class="chamada-frase">Estas seis são só o começo. Tem <strong>mais de quatro mil
+      modelos</strong> prontos para imprimir — e o pedido sai daqui direto no WhatsApp.</p>
     </div>
-    <div>
-      <div class="material rev-sm">
-        <div class="material-nome">PLA</div>
-        <div class="material-uso">Decoração, brinquedos, protótipos</div>
-        <div class="material-spec">RÍGIDO · 200 °C · FOSCO</div>
-        <div class="barra"><i style="width:92%"></i></div>
-      </div>
-      <div class="material rev-sm">
-        <div class="material-nome">PETG</div>
-        <div class="material-uso">Peças que apanham, uso externo</div>
-        <div class="material-spec">RESISTENTE · 240 °C · BRILHO</div>
-        <div class="barra"><i style="width:78%"></i></div>
-      </div>
-      <div class="material rev-sm">
-        <div class="material-nome">TPU</div>
-        <div class="material-uso">Flexíveis, capas, pés antiderrapantes</div>
-        <div class="material-spec">FLEXÍVEL · 225 °C · 95A</div>
-        <div class="barra"><i style="width:54%"></i></div>
-      </div>
-      <div class="material rev-sm">
-        <div class="material-nome">RESINA</div>
-        <div class="material-uso">Miniaturas e detalhe fino</div>
-        <div class="material-spec">DETALHE · 0,025 mm · UV</div>
-        <div class="barra"><i style="width:66%"></i></div>
-      </div>
-    </div>
-  </div>
+    <a class="btn btn-solido" href="catalogo.html" rel="nofollow">
+      Ver catálogo completo para pedido
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
+    </a>
+  </aside>
 </section>
 
 <!-- ============ PROCESSO ============ -->
@@ -330,6 +313,56 @@
       <h3>Entrega</h3>
       <p>Retirada combinada ou envio para todo o Brasil.</p>
     </div>
+  </div>
+</section>
+
+<!-- ============ CATÁLOGO ============ -->
+<!-- O segundo caminho para o catálogo, no meio da rolagem. Aqui ele não
+     argumenta por escrito: mostra as peças rolando e deixa o acervo falar.
+     A fita aparece duas vezes na marcação porque a volta precisa emendar
+     sem salto: quando a primeira cópia termina de passar, a segunda já
+     está no lugar exato onde a primeira começou. -->
+<section class="catalogo-faixa" aria-labelledby="catalogoTit">
+  <div class="catalogo-txt wrap">
+    <span class="catalogo-selo mono">ACERVO COMPLETO · 4.224 PEÇAS</span>
+    <h2 class="h2 rev" id="catalogoTit">Escolha a sua,<br>peça pelo zap</h2>
+    <p>Do dragão articulado ao organizador de gaveta. Você aponta a peça,
+    a gente imprime na sua cor e no seu tamanho.</p>
+    <a class="btn btn-solido" href="catalogo.html" rel="nofollow">
+      Ver catálogo completo para pedido
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="fita" aria-hidden="true">
+    <ul class="fita-trilho">
+      <li class="fita-peca p2" style="--h:233"><img src="assets/catalogo/4191.webp" alt="Ares" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:176"><img src="assets/catalogo/2954.webp" alt="Stitch Stash Trinket Dish" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p1" style="--h:191"><img src="assets/catalogo/4338.webp" alt="Crescent Lantern - Wreath" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p4" style="--h:244"><img src="assets/catalogo/3902.webp" alt="Snap Tractor" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p5" style="--h:240"><img src="assets/catalogo/4292.webp" alt="Dragon Hoard - Gacha Machine" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p1" style="--h:187"><img src="assets/catalogo/4269.webp" alt="Lionshield Knight" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p4" style="--h:248"><img src="assets/catalogo/4237.webp" alt="Cranium" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:10"><img src="assets/catalogo/4206.webp" alt="Perchmate - Glasses Holder" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p0" style="--h:280"><img src="assets/catalogo/4255.webp" alt="Field Runner - Disc Launcher" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:181"><img src="assets/catalogo/4098.webp" alt="Kitty Stacks - Puzzle" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p5" style="--h:186"><img src="assets/catalogo/2583.webp" alt="Lend a Hand back scratcher" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p1" style="--h:233"><img src="assets/catalogo/4324.webp" alt="Swing for Two - Table Lamp" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:233"><img src="assets/catalogo/4191.webp" alt="Ares" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:176"><img src="assets/catalogo/2954.webp" alt="Stitch Stash Trinket Dish" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p1" style="--h:191"><img src="assets/catalogo/4338.webp" alt="Crescent Lantern - Wreath" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p4" style="--h:244"><img src="assets/catalogo/3902.webp" alt="Snap Tractor" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p5" style="--h:240"><img src="assets/catalogo/4292.webp" alt="Dragon Hoard - Gacha Machine" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p1" style="--h:187"><img src="assets/catalogo/4269.webp" alt="Lionshield Knight" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p4" style="--h:248"><img src="assets/catalogo/4237.webp" alt="Cranium" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:10"><img src="assets/catalogo/4206.webp" alt="Perchmate - Glasses Holder" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p0" style="--h:280"><img src="assets/catalogo/4255.webp" alt="Field Runner - Disc Launcher" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p2" style="--h:181"><img src="assets/catalogo/4098.webp" alt="Kitty Stacks - Puzzle" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p5" style="--h:186"><img src="assets/catalogo/2583.webp" alt="Lend a Hand back scratcher" width="460" height="460" loading="lazy" decoding="async"></li>
+      <li class="fita-peca p1" style="--h:233"><img src="assets/catalogo/4324.webp" alt="Swing for Two - Table Lamp" width="460" height="460" loading="lazy" decoding="async"></li>
+    </ul>
   </div>
 </section>
 
@@ -391,14 +424,14 @@
 <!-- ============ GALERIA ============ -->
 <section class="sec">
   <div class="galeria rev">
-    <div class="largo"><figure class="slot"><span class="slot-txt">Peça em destaque</span></figure></div>
-    <div><figure class="slot"><span class="slot-txt">Detalhe</span></figure></div>
-    <div><figure class="slot"><span class="slot-txt">Peça</span></figure></div>
+    <div class="largo"><figure class="slot p5" style="--h:237"><img src="assets/home-destaque.webp" alt="Paladino impresso em 3D, escudo e capa pintados" width="550" height="900" loading="lazy" decoding="async"><span class="slot-txt">Peça em destaque</span></figure></div>
+    <div><figure class="slot p1" style="--h:134"><img src="assets/home-detalhe.webp" alt="Estátua velada, detalhe do acabamento" width="564" height="764" loading="lazy" decoding="async"><span class="slot-txt">Detalhe</span></figure></div>
+    <div><figure class="slot p3" style="--h:169"><img src="assets/home-peca-1.webp" alt="Dragão articulado impresso em 3D" width="588" height="881" loading="lazy" decoding="async"><span class="slot-txt">Peça</span></figure></div>
     <div class="frase"><span>Feito<br>à mão,<br>peça a peça</span></div>
     <div><figure class="slot"><span class="slot-txt">Detalhe da impressão</span></figure></div>
     <div><figure class="slot"><span class="slot-txt">Peça na casa</span></figure></div>
     <div><figure class="slot"><span class="slot-txt">Bancada</span></figure></div>
-    <div><figure class="slot"><span class="slot-txt">Peça</span></figure></div>
+    <div><figure class="slot p5" style="--h:224"><img src="assets/home-peca-2.webp" alt="Bandeja organizadora impressa em 3D" width="806" height="747" loading="lazy" decoding="async"><span class="slot-txt">Peça</span></figure></div>
     <div class="numero">
       <b>1.200+</b>
       <span>PEÇAS ENTREGUES</span>
@@ -481,7 +514,7 @@
   </div>
 </div>
 
-<script src="js/site.js?v=20260822b"></script>
-<script src="js/jogo.js?v=20260822b"></script>
+<script src="js/site.js?v=20260829d"></script>
+<script src="js/jogo.js?v=20260829d"></script>
 </body>
 </html>

@@ -174,7 +174,7 @@
   /* ==========================================================
      5. REVELAÇÕES NO SCROLL
      ========================================================== */
-  const alvos = $$('.rev, .rev-sm, .para, .material, .slogan, .logo-print');
+  const alvos = $$('.rev, .rev-sm, .para, .slogan, .logo-print');
   if ('IntersectionObserver' in window && !semMovimento) {
     const obs = new IntersectionObserver((entradas) => {
       entradas.forEach((e) => {
