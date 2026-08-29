@@ -775,9 +775,13 @@ a:hover { color: var(--azul-pale); }
   background-color: var(--fundo);
   background-image: var(--desenho), linear-gradient(155deg, var(--topo), var(--fundo) 74%);
 }
+/* A peça para de crescer onde os pixels dela acabam. Esticada além do
+   tamanho em que foi gravada, ela fica macia — e o que se vê como "baixa
+   qualidade" é só ampliação. Quem preenche a sobra do espaço é a textura,
+   que é desenhada pelo CSS e não borra em tamanho nenhum. */
 .slot img {
-  width: 100%; height: 100%;
-  padding: 6% 6% 7%;
+  width: auto; height: auto;
+  max-width: 88%; max-height: 86%;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 14px 26px rgba(0, 0, 0, .5));
