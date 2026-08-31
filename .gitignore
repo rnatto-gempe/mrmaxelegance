@@ -2,6 +2,11 @@
 # (contém perfil do Chrome com sessão do WhatsApp Web, chats e ~380 MB de dados)
 radar/
 
+# Matéria-prima da geração: dump da taxonomia e dos vídeos do acervo de
+# origem. Não sobe — o repositório é público e o acervo é do fornecedor.
+# Regerar leva um minuto: python3 tools/raspa-stlflix.py
+tools/dados/
+
 # Sistema / editor
 .DS_Store
 .playwright-mcp/

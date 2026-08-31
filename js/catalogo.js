@@ -76,6 +76,9 @@
     'brinquedo': 'toy', 'boneco': 'figure toy', 'boneca': 'doll',
     'articulado': 'articulated flexi', 'flexivel': 'flexi flexible',
     'quebracabeca': 'puzzle', 'puzzle': 'puzzle', 'jogo': 'game',
+    'empilhavel': 'stack blocks', 'planador': 'glider plane',
+    'bumerangue': 'boomerang', 'apito': 'whistle', 'pelucia': 'plush crochet',
+    'ursinho': 'teddy bear', 'carrinho': 'car truck racer',
     'dado': 'dice', 'dados': 'dice', 'tabuleiro': 'board game',
     'carta': 'card', 'cartas': 'card deck', 'ficha': 'token',
     'miniatura': 'miniature mini', 'boardgame': 'board game',
@@ -94,7 +97,20 @@
     'personalizado': 'custom customizable personalized',
     'personalizavel': 'customizable custom',
     'nome': 'name custom', 'letra': 'letter', 'numero': 'number',
+    /* O acervo sensorial não se chama "sensorial" em lugar nenhum: ele se
+       chama Fidget, Clicker, Slider, Flexi. Estas entradas são a ponte
+       entre a palavra do cliente e o nome da peça. */
     'antiestresse': 'fidget', 'fidget': 'fidget',
+    'sensorial': 'fidget sensorial clicker flexi',
+    'sensoriais': 'fidget sensorial clicker flexi',
+    'estimulo': 'fidget sensorial', 'tatil': 'fidget sensorial tactile',
+    'autismo': 'fidget sensorial', 'autista': 'fidget sensorial',
+    'tdah': 'fidget sensorial', 'ansiedade': 'fidget sensorial',
+    'concentracao': 'fidget sensorial', 'foco': 'fidget sensorial',
+    'terapia': 'fidget sensorial', 'terapeutico': 'fidget sensorial',
+    'apertar': 'press squish clicker', 'clicar': 'clicker click',
+    'girar': 'spinner gyro spinning', 'piao': 'spinning top',
+    'labirinto': 'maze', 'deslizar': 'slider',
     'ferramenta': 'tool', 'peca': 'part piece',
     'reposicao': 'replacement part', 'encaixe': 'fit mount',
     'medida': 'custom size', 'kit': 'kit set',
@@ -114,6 +130,10 @@
   var termo = '';
   var fichaAberta = -1;        // posição em `visiveis`
 
+  var temPrevia = {};          // { id: 1 } — quem tem vídeo em assets/hover
+  var previaAtiva = null;      // só um vídeo toca por vez, no card sob o mouse
+  var esperaPrevia = 0;
+
   var elMosaico, elContagem, elFiltros, elBusca, elCaixaBusca, elFicha, sentinela, observador;
   var elCaixaRegua;
   var estreito = window.matchMedia('(max-width: 860px)');
@@ -132,6 +152,14 @@
 
   function numero(n) {
     return n.toLocaleString('pt-BR');
+  }
+
+  // O catálogo funciona sem medição nenhuma: se `js/metricas.js` não estiver
+  // na página, ou se a chave estiver vazia, isto vira uma função que não faz
+  // nada — e nenhuma chamada abaixo precisa saber disso.
+  function mede(qual, a, b) {
+    var m = window.medidas;
+    if (m && typeof m[qual] === 'function') m[qual](a, b);
   }
 
   function escapa(txt) {
@@ -171,11 +199,41 @@
     return dados.categorias[i] ? dados.categorias[i][1] : '';
   }
 
+  // A etiqueta do card mostra uma categoria só, e a primeira da lista é a
+  // menos informativa: um clicker fica marcado "Brinquedos" porque essa
+  // faixa é mais antiga no catálogo. Vale a que o cliente está olhando —
+  // e, sem recorte, a mais específica das três faixas novas.
+  var ESPECIFICAS = ['sensorial', 'articulados', 'brinquedos'];
+
+  function etiqueta(it) {
+    if (!it.cats.length) return 'Modelo 3D';
+
+    for (var c = 0; c < it.cats.length; c++) {
+      if (dados.categorias[it.cats[c]][0] === categoriaAtiva) {
+        return nomeCategoria(it.cats[c]);
+      }
+    }
+    for (var e = 0; e < ESPECIFICAS.length; e++) {
+      for (var k = 0; k < it.cats.length; k++) {
+        if (dados.categorias[it.cats[k]][0] === ESPECIFICAS[e]) {
+          return nomeCategoria(it.cats[k]);
+        }
+      }
+    }
+    return nomeCategoria(it.cats[0]);
+  }
+
   /* ------------------------------------------------------------
      Chegada dos dados
      ------------------------------------------------------------ */
 
   function prepara() {
+    // A lista `hover` do catálogo diz quais peças têm prévia gravada. Ela
+    // viaja no mesmo arquivo do acervo: saber quais cards animam não custa
+    // nem uma requisição a mais.
+    temPrevia = {};
+    (dados.hover || []).forEach(function (id) { temPrevia[id] = 1; });
+
     indice = dados.itens.map(function (linha, pos) {
       var cats = linha[2] || [];
       // Os espaços nas pontas não são enfeite: a comparação procura
@@ -259,7 +317,7 @@
     // mínimo, que é o mesmo que não ter proporção nenhuma.
     var peso = Math.max(Math.sqrt(quantos), 1).toFixed(2);
     return '<button type="button" class="faixa" data-cat="' + escapa(slug) + '" '
-         + 'style="--peso:' + peso + '" aria-pressed="false">'
+         + 'data-n="' + quantos + '" style="--peso:' + peso + '" aria-pressed="false">'
          + '<span class="faixa-nome">' + escapa(nome) + '</span>'
          + '<span class="faixa-n mono">' + numero(quantos) + '</span>'
          + '</button>';
@@ -299,6 +357,10 @@
     atualizaContagem();
     desenhaLote();
     gravaEndereco();
+
+    // aqui já se sabe quantas peças o recorte devolveu — é o número que
+    // transforma "buscou por X" em "buscou por X e não achou nada"
+    if (termo) mede('buscou', termo, visiveis.length);
   }
 
   function atualizaContagem() {
@@ -320,14 +382,16 @@
      ------------------------------------------------------------ */
 
   function cartao(it, pos) {
-    var cat = it.cats.length ? nomeCategoria(it.cats[0]) : 'Modelo 3D';
+    var cat = etiqueta(it);
     // a matiz e o desenho do fundo viajam no próprio card; o CSS faz o resto
-    return '<button type="button" class="peca f' + it.formato + ' p' + it.desenho + '" '
+    var video = temPrevia[it.id] ? ' tem-video' : '';
+    return '<button type="button" class="peca f' + it.formato + ' p' + it.desenho + video + '" '
          + 'style="--h:' + it.matiz + '" data-pos="' + pos + '" '
          + 'aria-label="' + escapa(it.nome) + ' — abrir para pedir">'
          + '<img src="assets/catalogo/' + it.id + '.webp" alt="' + escapa(it.nome) + '" '
          + 'width="' + it.larg + '" height="' + it.alt + '" loading="lazy" decoding="async">'
          + '<span class="peca-selo">' + svgZap() + 'Pedir</span>'
+         + (video ? '<span class="peca-play">' + svgPlay() + '</span>' : '')
          + '<span class="peca-tarja">'
          + '<span class="peca-nome">' + escapa(it.nome) + '</span>'
          + '<span class="peca-cat">' + escapa(cat) + '</span>'
@@ -387,6 +451,79 @@
   }
 
   /* ------------------------------------------------------------
+     A prévia animada
+
+     Cada peça tem 3 segundos de vídeo mostrando a mão girando ela —
+     ~30 KB de MP4. O barato só continua barato se três regras valerem:
+
+     1. `preload="none"`: nada de vídeo enquanto o mouse não chega. Sem
+        isso, abrir o catálogo baixaria sessenta vídeos de uma vez.
+     2. Um vídeo por vez. O anterior é pausado, esvaziado e descartado —
+        vídeo pausado que continua no DOM segue com buffer na memória.
+     3. Um respiro de 140 ms antes de carregar. Atravessar o mosaico com o
+        mouse passa por vinte cards, e nenhum deles precisa de vídeo.
+     ------------------------------------------------------------ */
+
+  // Quem pediu menos movimento, ou está pagando por megabyte, fica só com
+  // a foto: a prévia é enfeite, não é o conteúdo.
+  function podeAnimar() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return false;
+    }
+    var rede = navigator.connection;
+    if (rede && (rede.saveData || /^([23]g|slow-2g)$/.test(rede.effectiveType || ''))) {
+      return false;
+    }
+    return true;
+  }
+
+  function soltaPrevia() {
+    clearTimeout(esperaPrevia);
+    if (!previaAtiva) return;
+    var v = previaAtiva.querySelector('video');
+    if (v) {
+      v.pause();
+      v.removeAttribute('src');   // sem isso o buffer fica de pé
+      v.load();
+      v.remove();
+    }
+    previaAtiva.classList.remove('animando');
+    previaAtiva = null;
+  }
+
+  function abrePrevia(card) {
+    if (previaAtiva === card) return;
+    soltaPrevia();
+    if (!card.classList.contains('tem-video') || !podeAnimar()) return;
+
+    var it = visiveis[Number(card.dataset.pos)];
+    if (!it) return;
+
+    esperaPrevia = setTimeout(function () {
+      // o mouse pode ter saído durante a espera
+      if (!card.matches(':hover')) return;
+
+      var v = document.createElement('video');
+      v.muted = true;              // sem isso o navegador barra o autoplay
+      v.defaultMuted = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.preload = 'none';
+      v.setAttribute('aria-hidden', 'true');
+      v.src = 'assets/hover/' + it.id + '.mp4';
+      v.addEventListener('canplay', function () {
+        card.classList.add('animando');
+        mede('viuPrevia', it);      // vídeo que tocou, não mouse que passou
+      }, { once: true });
+
+      card.appendChild(v);
+      previaAtiva = card;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { soltaPrevia(); });
+    }, 140);
+  }
+
+  /* ------------------------------------------------------------
      Ficha da peça
      ------------------------------------------------------------ */
 
@@ -420,12 +557,38 @@
       if (p >= 0 && p < visiveis.length) new Image().src = 'assets/catalogo/' + visiveis[p].id + '.webp';
     });
 
+    // Na ficha o vídeo entra sozinho: quem abriu a peça já demonstrou
+    // interesse, e 30 KB é menos que a foto que está ao lado. A foto fica
+    // como poster, então não há quadro vazio enquanto o vídeo chega.
+    var antigo = quadro.querySelector('video');
+    if (antigo) { antigo.pause(); antigo.removeAttribute('src'); antigo.load(); antigo.remove(); }
+    quadro.classList.toggle('tem-video', !!temPrevia[it.id]);
+    if (temPrevia[it.id] && podeAnimar()) {
+      var v = document.createElement('video');
+      v.muted = true;
+      v.defaultMuted = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.autoplay = true;
+      v.preload = 'metadata';
+      v.poster = 'assets/catalogo/' + it.id + '.webp';
+      v.setAttribute('aria-label', 'Vídeo da peça ' + it.nome + ' em movimento');
+      v.src = 'assets/hover/' + it.id + '.mp4';
+      quadro.appendChild(v);
+      var pp = v.play();
+      if (pp && pp.catch) pp.catch(function () {});
+    }
+
+    mede('abriuPeca', it);
+
     elFicha.setAttribute('data-aberta', 'sim');
     document.body.style.overflow = 'hidden';
     elFicha.querySelector('.ficha-fechar').focus();
   }
 
   function fechaFicha() {
+    var v = elFicha.querySelector('.ficha-img video');
+    if (v) { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); }
     fichaAberta = -1;
     elFicha.setAttribute('data-aberta', 'nao');
     document.body.style.overflow = '';
@@ -465,6 +628,11 @@
      Ícones
      ------------------------------------------------------------ */
 
+  function svgPlay() {
+    return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+      + '<path d="M8 5.5v13l11-6.5z"/></svg>';
+  }
+
   function svgZap() {
     return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
       + '<path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.56-.35z"/>'
@@ -482,6 +650,7 @@
       if (!b) return;
       // clicar de novo na faixa acesa volta para o acervo inteiro
       categoriaAtiva = (b.dataset.cat === categoriaAtiva) ? '' : b.dataset.cat;
+      mede('filtrou', categoriaAtiva, Number(b.dataset.n || 0));
       marcaFaixaAtiva();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       filtra();
@@ -512,10 +681,36 @@
       if (c) abreFicha(Number(c.dataset.pos));
     });
 
+    // A prévia entra por delegação: são 4 mil cards trocando de lugar a
+    // cada filtro, e pendurar dois ouvintes em cada um seria pagar caro
+    // por um efeito de enfeite. `pointerover` cobre mouse e caneta; o dedo
+    // não dispara hover, e no telefone a prévia vive na ficha.
+    elMosaico.addEventListener('pointerover', function (e) {
+      if (e.pointerType === 'touch') return;
+      var c = e.target.closest('.peca');
+      if (c) abrePrevia(c);
+    });
+    elMosaico.addEventListener('pointerout', function (e) {
+      var c = e.target.closest('.peca');
+      if (c && c === previaAtiva && !c.contains(e.relatedTarget)) soltaPrevia();
+    });
+    // rolar com o mouse parado deixaria o vídeo tocando num card que já
+    // saiu de baixo do cursor
+    window.addEventListener('scroll', function () {
+      if (previaAtiva && !previaAtiva.matches(':hover')) soltaPrevia();
+    }, { passive: true });
+
     // fechar / navegar
     elFicha.addEventListener('click', function (e) {
       if (e.target === elFicha) fechaFicha();
     });
+    // O pedido é a única conversão que este site tem. O evento vai por
+    // `sendBeacon`, que entrega mesmo com a página já saindo para o
+    // WhatsApp — e o clique segue seu caminho sem esperar por nada.
+    elFicha.querySelector('.ficha-acao a').addEventListener('click', function () {
+      if (fichaAberta >= 0) mede('pediu', visiveis[fichaAberta], 'ficha');
+    });
+
     elFicha.querySelector('.ficha-fechar').addEventListener('click', fechaFicha);
     elFicha.querySelector('.ficha-passo.ant').addEventListener('click', function () { passa(-1); });
     elFicha.querySelector('.ficha-passo.pro').addEventListener('click', function () { passa(1); });
@@ -607,6 +802,7 @@
         montaFiltros();
         marcaFaixaAtiva();
         filtra();
+        mede('abriu', categoriaAtiva, termo);
       })
       .catch(function (erro) {
         elContagem.innerHTML = '<b>—</b> catálogo fora do ar';

@@ -109,8 +109,11 @@ const BRAND_CONFIG = {
   // =========================================================================
   analytics: {
     posthog: {
-      apiKey: "", // Cole sua chave "phc_..." do PostHog quando desejar
-      apiHost: "https://us.i.posthog.com",
+      // A chave mora em js/chave-posthog.js, um arquivo só para ela — o
+      // catálogo lê de lá também, e duas cópias da mesma chave é uma que
+      // fica velha.
+      apiKey: window.POSTHOG_CHAVE || "",
+      apiHost: window.POSTHOG_HOST || "https://us.i.posthog.com",
       enableSessionRecording: true
     },
     enableInternalDashboard: true,

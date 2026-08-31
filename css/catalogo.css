@@ -653,6 +653,65 @@ a { color: var(--azul-claro); text-decoration: none; }
   .peca-selo { display: none; }
 }
 
+/* ---------- a prévia animada ----------
+
+   O vídeo entra por cima da foto, em `cover`: ele é filmado em 4:5 e o card
+   muda de proporção conforme o formato da peça, então preencher e cortar é
+   o único jeito de não deixar tarja preta. A foto continua embaixo — é ela
+   que aparece nos 200 ms em que o vídeo ainda está chegando, e é para ela
+   que o card volta quando o mouse sai.
+
+   O selo de play some no hover: quem já está com o vídeo na frente não
+   precisa mais do convite. */
+
+.peca video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .28s ease;
+  pointer-events: none;
+}
+.peca.animando video { opacity: 1; }
+.peca.animando img { opacity: 0; transition: opacity .28s ease; }
+
+.peca-play {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(8, 11, 16, .62);
+  backdrop-filter: blur(3px);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, .92);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16);
+  pointer-events: none;
+  transition: opacity .2s, transform .25s cubic-bezier(.2, .8, .3, 1);
+}
+.peca-play svg { width: 12px; height: 12px; margin-left: 1px; }
+.peca:hover .peca-play { opacity: 0; transform: scale(.86); }
+
+/* ---------- o vídeo dentro da ficha ---------- */
+
+.ficha-img video {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  display: block;
+}
+/* Com vídeo, a foto sai da vez: as duas empilhadas no mesmo grid
+   dobrariam a altura do quadro em telas estreitas. */
+.ficha-img.tem-video img { display: none; }
+
 /* ---------- nada encontrado ---------- */
 
 .vazio {
@@ -756,6 +815,17 @@ a { color: var(--azul-claro); text-decoration: none; }
    tag mandam no tamanho, e a imagem para de crescer onde os pixels acabam.
    O quadro continua grande — quem preenche a sobra é a textura, que é
    desenhada pelo CSS e não borra em tamanho nenhum. */
+/* O `min-height: 0` não é enfeite. Item de grid nasce com
+   `min-height: auto` — o tamanho mínimo automático —, e isso vence o
+   `max-height` quando a mídia é maior que o quadro: a foto de uma peça
+   esguia (250×460) transbordava por cima do nome dela em tela estreita, e
+   o vídeo, mais alto ainda, subia por cima do título. Com o mínimo zerado,
+   o limite volta a mandar. */
+.ficha-img img,
+.ficha-img video {
+  min-width: 0;
+  min-height: 0;
+}
 .ficha-img img {
   width: auto;
   height: auto;
@@ -889,11 +959,15 @@ a { color: var(--azul-claro); text-decoration: none; }
 @media (max-width: 860px) {
   .ficha-caixa {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto;
+    /* A altura mora na linha, não no quadro. `minmax(0, 1fr)` deixava a
+       linha do tamanho do conteúdo, e aí o `max-height: 100%` da mídia não
+       tinha medida a que se referir: a foto de uma peça esguia e o vídeo
+       (mais alto ainda) passavam por cima do nome. Com `40vh` aqui, a linha
+       manda, o quadro preenche e a mídia se limita a ele. */
+    grid-template-rows: 40vh auto;
     max-height: 92vh;
   }
   .ficha-img { padding: 18px; }
-  .ficha-img img { max-height: 40vh; }
   .ficha-lado { border-left: 0; border-top: 1px solid var(--linha); }
 }
 
@@ -934,6 +1008,8 @@ a { color: var(--azul-claro); text-decoration: none; }
     scroll-behavior: auto !important;
   }
   .peca img { opacity: 1; transform: none; }
+  .peca video { display: none; }
+  .peca.animando img { opacity: 1; }
 }
 
 @media (max-width: 760px) {
