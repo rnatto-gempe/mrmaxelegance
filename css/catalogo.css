@@ -664,19 +664,26 @@ a { color: var(--azul-claro); text-decoration: none; }
    O selo de play some no hover: quem já está com o vídeo na frente não
    precisa mais do convite. */
 
-.peca video {
+.peca video,
+.peca img.previa {
   position: absolute;
   inset: 0;
   z-index: 1;
   width: 100%;
   height: 100%;
+  padding: 0;                 /* a foto do card tem respiro; a prévia preenche */
   object-fit: cover;
   opacity: 0;
+  transform: none;
   transition: opacity .28s ease;
   pointer-events: none;
+  filter: none;               /* sem a sombra que a peça recortada usa */
 }
-.peca.animando video { opacity: 1; }
-.peca.animando img { opacity: 0; transition: opacity .28s ease; }
+.peca.animando video,
+.peca.animando img.previa { opacity: 1; }
+/* a foto recortada sai de cena — `:not(.previa)` para a prévia não se apagar
+   a si mesma, já que as duas são <img> */
+.peca.animando img:not(.previa) { opacity: 0; transition: opacity .28s ease; }
 
 .peca-play {
   position: absolute;
@@ -700,14 +707,23 @@ a { color: var(--azul-claro); text-decoration: none; }
 
 /* ---------- o vídeo dentro da ficha ---------- */
 
-.ficha-img video {
-  width: 100%;
+/* Tamanho natural, como a foto recortada ao lado — e não `width: 100%`.
+   Esticar a mídia (400 px de altura nativos) para a largura do quadro
+   inflava a linha do grid além da caixa, e o botão de pedido saía da tela.
+   O `max-height: 100%` sozinho não segura isso: numa linha dimensionada
+   pelo conteúdo, o cálculo é circular. */
+.ficha-img video,
+.ficha-img img.previa {
+  width: auto;
   height: auto;
   max-width: 100%;
   max-height: 100%;
   border-radius: 8px;
   display: block;
 }
+/* Com foto de galeria, a peça recortada dá lugar a ela: são duas imagens no
+   mesmo lugar do grid, e empilhadas dobrariam a altura do quadro. */
+.ficha-img:has(img.previa) img:not(.previa) { display: none; }
 /* Com vídeo, a foto sai da vez: as duas empilhadas no mesmo grid
    dobrariam a altura do quadro em telas estreitas. */
 .ficha-img.tem-video img { display: none; }
@@ -822,7 +838,8 @@ a { color: var(--azul-claro); text-decoration: none; }
    o vídeo, mais alto ainda, subia por cima do título. Com o mínimo zerado,
    o limite volta a mandar. */
 .ficha-img img,
-.ficha-img video {
+.ficha-img video,
+.ficha-img img.previa {
   min-width: 0;
   min-height: 0;
 }
@@ -1008,8 +1025,8 @@ a { color: var(--azul-claro); text-decoration: none; }
     scroll-behavior: auto !important;
   }
   .peca img { opacity: 1; transform: none; }
-  .peca video { display: none; }
-  .peca.animando img { opacity: 1; }
+  .peca video, .peca img.previa { display: none; }
+  .peca.animando img:not(.previa) { opacity: 1; }
 }
 
 @media (max-width: 760px) {

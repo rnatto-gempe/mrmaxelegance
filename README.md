@@ -49,7 +49,7 @@ mrmaxelegance/
     ├── materialization.mp4
     ├── catalogo.json   # o catálogo inteiro (110 KB, 34 KB na rede)
     ├── catalogo/       # uma imagem WebP por peça
-    ├── hover/          # uma prévia MP4 de 3s por peça que tem vídeo
+    ├── hover/          # prévia por peça: MP4 de 3s, ou WebP da galeria
     └── peca-*.webp     # as seis fotos do índice da home
 ```
 
@@ -364,6 +364,40 @@ Subir de 12 para 24 conversões simultâneas derrubou a taxa de 20/min para
 esperavam rede. Depois de ~2.500 downloads a origem passou a limitar o IP
 (um arquivo isolado não completava 2 MB em 2min30), e a única saída foi
 pausar e retomar mais tarde, com 8 em paralelo.
+
+### As 140 peças que a origem nunca filmou
+
+Nem toda peça tem vídeo no STLFLIX: 140 do catálogo nunca receberam um. O
+card delas ficaria parado enquanto o vizinho anima — e não precisa, porque
+todas têm galeria, de cinco a sete fotos. A primeira foto da galeria mostra a
+peça em cena real, de outro ângulo, que é exatamente o papel que o vídeo
+cumpre nas outras.
+
+`tools/foto-hover.py` busca essa foto e grava `assets/hover/<id>.webp`:
+**125 peças, 7 KB de média** (as outras 15 não têm nada além da miniatura, que
+o card já mostra — repetir ela no hover não contaria nada de novo). Fundo de
+estúdio chapado comprime muito, e é por isso que a foto sai mais leve que o
+vídeo.
+
+A galeria não vem na busca do acervo, só na página da peça, então o script lê
+cada uma pela rota de dados do Next — e descobre o número da versão publicada
+da plataforma na home, porque ele muda a cada deploy deles.
+
+O catálogo lê **duas listas**: `hover` (vídeo) e `hover_foto` (imagem). Vídeo
+tem preferência quando existem os dois. No card, a foto entra pela mesma
+mecânica do vídeo, com a mesma transição — só o selo de play fica de fora,
+que aquilo ali não toca. Total: **4.177 das 4.224 peças com prévia (98,9%)**.
+
+```bash
+python3 tools/foto-hover.py --gravar
+python3 tools/foto-hover.py --gravar --refazer   # troca as fotos já baixadas
+```
+
+Um detalhe de CSS que custou uma medição: a mídia da ficha fica em **tamanho
+natural** (`width: auto`), não em `width: 100%`. Esticada para a largura do
+quadro, a foto de 400 px nativos virava 691 px e **inflava a linha do grid**
+além da caixa — o botão de pedir saía da tela. O `max-height: 100%` não
+segura isso: numa linha dimensionada pelo conteúdo, o cálculo é circular.
 
 ### Medição: o que o catálogo conta ao PostHog
 

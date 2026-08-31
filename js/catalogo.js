@@ -130,7 +130,7 @@
   var termo = '';
   var fichaAberta = -1;        // posição em `visiveis`
 
-  var temPrevia = {};          // { id: 1 } — quem tem vídeo em assets/hover
+  var temPrevia = {};          // { id: 'video' | 'foto' } — o que há em assets/hover
   var previaAtiva = null;      // só um vídeo toca por vez, no card sob o mouse
   var esperaPrevia = 0;
 
@@ -228,11 +228,15 @@
      ------------------------------------------------------------ */
 
   function prepara() {
-    // A lista `hover` do catálogo diz quais peças têm prévia gravada. Ela
-    // viaja no mesmo arquivo do acervo: saber quais cards animam não custa
-    // nem uma requisição a mais.
+    // Duas listas dizem o que cada peça tem: `hover` é vídeo, `hover_foto` é
+    // a foto de galeria das 140 peças que a origem nunca filmou. Ambas viajam
+    // no mesmo arquivo do acervo — saber quais cards animam não custa nem uma
+    // requisição a mais.
     temPrevia = {};
-    (dados.hover || []).forEach(function (id) { temPrevia[id] = 1; });
+    (dados.hover || []).forEach(function (id) { temPrevia[id] = 'video'; });
+    (dados.hover_foto || []).forEach(function (id) {
+      if (!temPrevia[id]) temPrevia[id] = 'foto';    // vídeo tem preferência
+    });
 
     indice = dados.itens.map(function (linha, pos) {
       var cats = linha[2] || [];
@@ -384,14 +388,15 @@
   function cartao(it, pos) {
     var cat = etiqueta(it);
     // a matiz e o desenho do fundo viajam no próprio card; o CSS faz o resto
-    var video = temPrevia[it.id] ? ' tem-video' : '';
-    return '<button type="button" class="peca f' + it.formato + ' p' + it.desenho + video + '" '
+    var previa = temPrevia[it.id] || '';
+    var marca = previa ? ' tem-previa tem-' + previa : '';
+    return '<button type="button" class="peca f' + it.formato + ' p' + it.desenho + marca + '" '
          + 'style="--h:' + it.matiz + '" data-pos="' + pos + '" '
          + 'aria-label="' + escapa(it.nome) + ' — abrir para pedir">'
          + '<img src="assets/catalogo/' + it.id + '.webp" alt="' + escapa(it.nome) + '" '
          + 'width="' + it.larg + '" height="' + it.alt + '" loading="lazy" decoding="async">'
          + '<span class="peca-selo">' + svgZap() + 'Pedir</span>'
-         + (video ? '<span class="peca-play">' + svgPlay() + '</span>' : '')
+         + (previa === 'video' ? '<span class="peca-play">' + svgPlay() + '</span>' : '')
          + '<span class="peca-tarja">'
          + '<span class="peca-nome">' + escapa(it.nome) + '</span>'
          + '<span class="peca-cat">' + escapa(cat) + '</span>'
@@ -487,6 +492,8 @@
       v.load();
       v.remove();
     }
+    var f = previaAtiva.querySelector('img.previa');
+    if (f) f.remove();
     previaAtiva.classList.remove('animando');
     previaAtiva = null;
   }
@@ -494,10 +501,31 @@
   function abrePrevia(card) {
     if (previaAtiva === card) return;
     soltaPrevia();
-    if (!card.classList.contains('tem-video') || !podeAnimar()) return;
+    if (!card.classList.contains('tem-previa') || !podeAnimar()) return;
 
     var it = visiveis[Number(card.dataset.pos)];
     if (!it) return;
+
+    // Cento e quarenta peças nunca foram filmadas pela origem. Para elas a
+    // prévia é a primeira foto da galeria — a peça em cena, de outro ângulo,
+    // que é o mesmo papel que o vídeo cumpre nas outras. Sete quilobytes.
+    if (temPrevia[it.id] === 'foto') {
+      esperaPrevia = setTimeout(function () {
+        if (!card.matches(':hover')) return;
+        var f = document.createElement('img');
+        f.className = 'previa';
+        f.alt = '';
+        f.setAttribute('aria-hidden', 'true');
+        f.addEventListener('load', function () {
+          card.classList.add('animando');
+        }, { once: true });
+        f.src = 'assets/hover/' + it.id + '.webp';
+        card.appendChild(f);
+        previaAtiva = card;
+        mede('viuPrevia', it);
+      }, 140);
+      return;
+    }
 
     esperaPrevia = setTimeout(function () {
       // o mouse pode ter saído durante a espera
@@ -562,8 +590,22 @@
     // como poster, então não há quadro vazio enquanto o vídeo chega.
     var antigo = quadro.querySelector('video');
     if (antigo) { antigo.pause(); antigo.removeAttribute('src'); antigo.load(); antigo.remove(); }
-    quadro.classList.toggle('tem-video', !!temPrevia[it.id]);
-    if (temPrevia[it.id] && podeAnimar()) {
+    var fotoAntiga = quadro.querySelector('img.previa');
+    if (fotoAntiga) fotoAntiga.remove();
+
+    quadro.classList.toggle('tem-video', temPrevia[it.id] === 'video');
+
+    // Sem vídeo, a ficha mostra a foto da galeria embaixo do nome: é a
+    // peça em cena real, coisa que a imagem recortada do card não conta.
+    if (temPrevia[it.id] === 'foto') {
+      var fg = document.createElement('img');
+      fg.className = 'previa';
+      fg.alt = it.nome + ' — foto da peça';
+      fg.src = 'assets/hover/' + it.id + '.webp';
+      quadro.appendChild(fg);
+    }
+
+    if (temPrevia[it.id] === 'video' && podeAnimar()) {
       var v = document.createElement('video');
       v.muted = true;
       v.defaultMuted = true;
@@ -589,6 +631,8 @@
   function fechaFicha() {
     var v = elFicha.querySelector('.ficha-img video');
     if (v) { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); }
+    var f = elFicha.querySelector('.ficha-img img.previa');
+    if (f) f.remove();
     fichaAberta = -1;
     elFicha.setAttribute('data-aberta', 'nao');
     document.body.style.overflow = '';
