@@ -7,6 +7,12 @@ radar/
 # Regerar leva um minuto: python3 tools/raspa-stlflix.py
 tools/dados/
 
+# Segredos. O `.env` guarda a chave pessoal do PostHog, que lê e escreve a
+# conta inteira — e este repositório é público. Só `.env.exemplo` sobe.
+.env
+.env.*
+!.env.exemplo
+
 # Sistema / editor
 .DS_Store
 .playwright-mcp/

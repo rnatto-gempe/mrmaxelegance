@@ -110,6 +110,15 @@ em todas as páginas que o usam. Sem isso, quem já visitou o site continua vend
 antiga até o cache expirar. Para publicar na hora, dá para limpar o cache no painel do
 Cloudflare (Caching → Purge Everything).
 
+## A chave pessoal do PostHog
+
+`tools/` precisa de uma chave pessoal (`phx_...`) para criar e atualizar
+painéis — ela lê e escreve a conta inteira, ao contrário da `phc_` do site,
+que só enfileira evento. Ela mora em `.env`, que **não sobe**: este
+repositório é público. Copie `.env.exemplo`, preencha, e crie a chave em
+PostHog → avatar → Personal API keys, com os escopos `project:read`,
+`insight:write`, `dashboard:write` e `query:read`.
+
 ## Rodando local
 
 ```bash
@@ -479,6 +488,40 @@ Três detalhes que o código carrega de propósito:
 
 Se `js/metricas.js` não estiver na página, o catálogo funciona igual: as
 chamadas passam por um atalho que não faz nada.
+
+### Os painéis no PostHog
+
+Painel **CAT-RDC-000** (projeto 588514, região US), com três cartões. O nome
+segue o mesmo esquema das peças: `CAT` de Catálogo, iniciais de cada palavra,
+número na sequência.
+
+| Cartão | Evento | Responde |
+|---|---|---|
+| `CAT-RDC-001` | `peca_aberta` | quais peças as pessoas abrem |
+| `CAT-RDQMCA-002` | `previa_vista` | onde o mouse parou até a prévia tocar |
+| `CAT-RDCPOW-003` | `pedido_whatsapp` | conversão real, peça por peça |
+
+Todos agrupam por `codigo` — é o que faz o ranking ordenar e cruzar entre os
+três cartões — em janela de 30 dias, excluindo o que vem de `localhost`.
+
+Foram criados pela API REST, com a chave pessoal do `.env`. Três coisas que
+custaram tentativa e erro, e ficam registradas para a próxima:
+
+- **`not_icontains` zera o resultado sem avisar.** Filtrar `$host` com
+  `{'operator': 'not_icontains', 'value': 'localhost'}` devolve zero linha,
+  200 na resposta e nenhum erro — os três cartões nasceram assim, mostrando
+  vazio com dados no banco. O mesmo filtro em HogQL
+  (`properties.$host not ilike '%localhost%'`) funciona.
+- **`breakdownFilter` quer `breakdowns` no plural**, uma lista de
+  `{property, type}`. A forma singular é rejeitada na validação.
+- **O resultado do cartão vem de cache.** Consultar o insight logo depois de
+  criar devolve o último resultado calculado, que pode estar vazio; use
+  `?refresh=force_blocking` para recalcular na hora.
+
+O CLI oficial (`npx @posthog/cli`) expõe as mesmas ferramentas, mas exige o
+escopo `user:read` só para descobrir o projeto. A API REST direta dispensa
+isso — precisa apenas de `project:read`, `insight:write`, `dashboard:write` e
+`query:read`.
 
 ### O acervo de origem, e como ele é lido
 
