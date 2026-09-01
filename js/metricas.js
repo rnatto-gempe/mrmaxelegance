@@ -107,11 +107,28 @@
   var esperaBusca = 0;
   var previasVistas = {};
 
+  // Todo evento de peça carrega a peça inteira: código, id e nome. Um
+  // relatório que só tem id vira uma tabela de números; um que só tem nome
+  // não agrupa nem ordena. Os três juntos servem tanto ao ranking quanto a
+  // quem vai ler uma linha dele — e é o mesmo conjunto em todos os eventos,
+  // porque ranking de eventos diferentes só cruza se a chave for a mesma.
+  function daPeca(it, extra) {
+    var props = {
+      codigo: it.codigo || ('MM-' + it.id),
+      peca_id: it.id,
+      peca: it.nome
+    };
+    for (var k in (extra || {})) {
+      if (Object.prototype.hasOwnProperty.call(extra, k)) props[k] = extra[k];
+    }
+    return props;
+  }
+
   janela.medidas = {
     ligado: ligado,
 
     abriu: function (filtro, termo) {
-      manda('$pageview', { filtro: filtro || '(todas)', termo: termo || '' });
+      manda('$pageview', { faixa: filtro || '(todas)', termo: termo || '' });
     },
 
     // A busca só é registrada quando a digitação para de verdade. Sem esta
@@ -129,25 +146,24 @@
       }, 900);
     },
 
-    filtrou: function (faixa, pecas) {
-      manda('faixa_filtrada', { faixa: faixa || '(todas)', pecas: pecas });
+    // recebe { faixa, rotulo, pecas } — o slug ordena, o rótulo se lê
+    filtrou: function (o) {
+      manda('faixa_filtrada', o || {});
     },
 
     abriuPeca: function (it) {
-      manda('peca_aberta', { peca_id: it.id, peca: it.nome, codigo: 'MM-' + it.id });
+      manda('peca_aberta', daPeca(it));
     },
 
     // uma vez por peça por visita: o mouse volta ao mesmo card sem querer
     viuPrevia: function (it) {
       if (previasVistas[it.id]) return;
       previasVistas[it.id] = 1;
-      manda('previa_vista', { peca_id: it.id, peca: it.nome });
+      manda('previa_vista', daPeca(it));
     },
 
     pediu: function (it, de) {
-      manda('pedido_whatsapp', {
-        peca_id: it.id, peca: it.nome, codigo: 'MM-' + it.id, origem: de
-      });
+      manda('pedido_whatsapp', daPeca(it, { origem: de }));
     }
   };
 }(window));

@@ -399,6 +399,35 @@ quadro, a foto de 400 px nativos virava 691 px e **inflava a linha do grid**
 além da caixa — o botão de pedir saía da tela. O `max-height: 100%` não
 segura isso: numa linha dimensionada pelo conteúdo, o cálculo é circular.
 
+### O código da peça: CAT-INICIAIS-NÚMERO
+
+`SEN-SDC-0375` é a 375ª peça do arquivo, Sensorial, "Smiley Dumplin' -
+Clicker". Num ranking, o código diz categoria, peça e posição de uma vez, e
+ordena bonito — coisa que "Smiley Dumplin' - Clicker" não faz.
+
+Ele aparece na ficha, vai na mensagem do WhatsApp ao lado do `MM-` (que a
+operação já usa para achar o pedido) e viaja em **todo** evento de peça.
+
+Três decisões o mantêm confiável:
+
+**A categoria não é a etiqueta do card.** A etiqueta muda conforme o filtro
+que o cliente está usando — o código mudaria junto, e o mesmo clique viraria
+duas linhas diferentes no relatório. A regra do código é fixa: a mais
+específica das três faixas novas, senão a primeira categoria da peça. Por
+isso "Redline - Disc Launcher", filtrado em Cosplay, é `BRI`: ele também é
+brinquedo, e brinquedo é o recorte mais específico que ele tem.
+
+**As três letras são escritas à mão.** Cortar o nome da categoria não
+funciona: `arte` e `articulados` dariam `ART` as duas, e 868 códigos ficariam
+misturando "Arte & Decoração" com dragão flexi. Um ranking que soma duas
+coisas diferentes não é ranking. Hoje são 16 prefixos para 16 categorias,
+`articulados` virou `ARC` e `fantasia` virou `COS` (o rótulo é Cosplay).
+
+**O número é a posição no `catalogo.json`, e isso é um contrato.** Reordenar
+os itens renomeia o acervo inteiro e quebra todo relatório antigo. Quem
+regerar o catálogo **precisa preservar a ordem** — acrescente no fim, nunca
+no meio. Auditado: 4.224 códigos, todos únicos, entre 10 e 18 caracteres.
+
 ### Medição: o que o catálogo conta ao PostHog
 
 `js/app.js` já carregava o SDK do PostHog na página de links, e faltava
@@ -424,6 +453,10 @@ aleatório guardado no navegador; não há login, nome nem e-mail em lugar
 nenhum.
 
 Cinco perguntas, e nada além delas:
+
+Todo evento de peça carrega o mesmo trio — `codigo`, `peca_id`, `peca`. Um
+relatório que só tem id vira tabela de números; um que só tem nome não agrupa
+nem ordena; e ranking de eventos diferentes só cruza se a chave for a mesma.
 
 | Evento | Responde |
 |---|---|

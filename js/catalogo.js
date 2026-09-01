@@ -162,6 +162,87 @@
     if (m && typeof m[qual] === 'function') m[qual](a, b);
   }
 
+  /* ------------------------------------------------------------
+     O código da peça: CAT-INICIAIS-NÚMERO
+
+     `SEN-SDC-0042` é a 42ª peça do arquivo, Sensorial, "Smiley Dumplin' -
+     Clicker". Ele existe para os relatórios: num ranking, "SEN-SDC-0042"
+     diz categoria, peça e posição de uma vez, e ordena bonito.
+
+     Duas coisas o mantêm estável, e as duas são deliberadas:
+
+     1. **A categoria não é a etiqueta do card.** A etiqueta muda conforme o
+        filtro que o cliente está usando — o código mudaria junto, e o mesmo
+        clique viraria duas linhas diferentes no relatório. Aqui a ordem é
+        fixa: a mais específica das três faixas novas, senão a primeira
+        categoria da peça.
+     2. **O número é a posição no `catalogo.json`.** Isso transforma a ordem
+        do arquivo em contrato: reordenar os itens renomeia o acervo inteiro
+        e quebra todo relatório antigo. Quem regerar o catálogo precisa
+        preservar a ordem — está dito no README.
+     ------------------------------------------------------------ */
+
+  function semAcento(txt) {
+    return String(txt).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  /* As três letras de cada categoria, escritas à mão porque cortar o nome
+     não funciona: **arte** e **articulados** dariam `ART` as duas**, e 868
+     códigos ficariam misturando "Arte & Decoração" com dragão flexi — um
+     ranking que soma duas coisas diferentes não é ranking.
+
+     Categoria nova sem entrada aqui cai nas três primeiras letras do slug.
+     Se elas colidirem com alguma linha desta tabela, acrescente a exceção. */
+  var PREFIXO = {
+    casa: 'CAS',
+    arte: 'ART',
+    articulados: 'ARC',          // não ART: colidiria com arte
+    brinquedos: 'BRI',
+    sensorial: 'SEN',
+    datas: 'DAT',
+    miniaturas: 'MIN',
+    grandes: 'GRA',
+    fantasia: 'COS',             // a faixa se chama Cosplay
+    gadgets: 'GAD',
+    games: 'GAM',
+    personalizar: 'PER',
+    hobby: 'HOB',
+    saude: 'SAU',
+    educativo: 'EDU',
+    pets: 'PET'
+  };
+
+  function catDoCodigo(it) {
+    if (!it.cats.length) return 'GER';          // sem categoria: geral
+    var escolhida = it.cats[0];
+    for (var e = 0; e < ESPECIFICAS.length; e++) {
+      for (var k = 0; k < it.cats.length; k++) {
+        if (dados.categorias[it.cats[k]][0] === ESPECIFICAS[e]) {
+          escolhida = it.cats[k];
+          e = ESPECIFICAS.length;               // achou a mais específica
+          break;
+        }
+      }
+    }
+    var slug = dados.categorias[escolhida][0];
+    return PREFIXO[slug] || semAcento(slug).slice(0, 3).toUpperCase();
+  }
+
+  function iniciais(nome) {
+    var palavras = semAcento(nome).split(/[^A-Za-z0-9]+/);
+    var letras = '';
+    for (var i = 0; i < palavras.length; i++) {
+      if (palavras[i]) letras += palavras[i].charAt(0).toUpperCase();
+    }
+    return letras || 'X';
+  }
+
+  function codigoPeca(it) {
+    var n = String(it.pos + 1);
+    while (n.length < 4) n = '0' + n;
+    return catDoCodigo(it) + '-' + iniciais(it.nome) + '-' + n;
+  }
+
   function escapa(txt) {
     return String(txt).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -188,9 +269,11 @@
   }
 
   function linkZap(item) {
+    // Os dois códigos vão juntos: o novo identifica a peça nos relatórios, e
+    // o MM- é o que a operação já usa para achar o pedido no acervo.
     var texto = 'Olá! Vi o catálogo no site e quero fazer um pedido desta peça:\n\n'
       + '▸ ' + item.nome + '\n'
-      + '▸ Código: MM-' + item.id + '\n\n'
+      + '▸ Código: ' + (item.codigo || '') + ' (MM-' + item.id + ')\n\n'
       + 'Pode me passar prazo e valor?';
     return 'https://wa.me/' + ZAP + '?text=' + encodeURIComponent(texto);
   }
@@ -199,12 +282,15 @@
     return dados.categorias[i] ? dados.categorias[i][1] : '';
   }
 
+  // A ordem de especificidade das três faixas novas, usada pela etiqueta do
+  // card e pelo código da peça: um clicker é mais "Sensorial" que
+  // "Brinquedos", ainda que esteja nas duas.
+  var ESPECIFICAS = ['sensorial', 'articulados', 'brinquedos'];
+
   // A etiqueta do card mostra uma categoria só, e a primeira da lista é a
   // menos informativa: um clicker fica marcado "Brinquedos" porque essa
   // faixa é mais antiga no catálogo. Vale a que o cliente está olhando —
   // e, sem recorte, a mais específica das três faixas novas.
-  var ESPECIFICAS = ['sensorial', 'articulados', 'brinquedos'];
-
   function etiqueta(it) {
     if (!it.cats.length) return 'Modelo 3D';
 
@@ -260,6 +346,10 @@
         pos: pos
       };
     });
+
+    // O código depende da lista de categorias, que só existe agora — e é
+    // calculado uma vez por peça, não a cada evento.
+    indice.forEach(function (it) { it.codigo = codigoPeca(it); });
   }
 
   function montaFiltros() {
@@ -570,7 +660,7 @@
     foto.height = it.alt;
     foto.src = 'assets/catalogo/' + it.id + '.webp';
     foto.alt = it.nome;
-    elFicha.querySelector('.ficha-cod').textContent = 'Código MM-' + it.id
+    elFicha.querySelector('.ficha-cod').textContent = it.codigo
       + ' · ' + numero(pos + 1) + ' de ' + numero(visiveis.length);
     elFicha.querySelector('.ficha-nome').textContent = it.nome;
 
@@ -700,7 +790,11 @@
       // depois de filtrar, não antes: clicar na faixa acesa desliga o
       // recorte, e aí a contagem que vale é a do acervo inteiro, não a do
       // botão que foi clicado
-      mede('filtrou', categoriaAtiva, visiveis.length);
+      mede('filtrou', {
+        faixa: categoriaAtiva || '(todas)',
+        rotulo: categoriaAtiva ? b.querySelector('.faixa-nome').textContent : 'Todas',
+        pecas: visiveis.length
+      });
     });
 
     // busca — espera a digitação parar antes de refazer a tela
