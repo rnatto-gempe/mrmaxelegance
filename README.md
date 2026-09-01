@@ -491,15 +491,22 @@ chamadas passam por um atalho que não faz nada.
 
 ### Os painéis no PostHog
 
-Painel **CAT-RDC-000** (projeto 588514, região US), com três cartões. O nome
-segue o mesmo esquema das peças: `CAT` de Catálogo, iniciais de cada palavra,
-número na sequência.
+Painel **CAT-PC-000** (projeto 588514, região US), com três cartões:
 
-| Cartão | Evento | Responde |
-|---|---|---|
-| `CAT-RDC-001` | `peca_aberta` | quais peças as pessoas abrem |
-| `CAT-RDQMCA-002` | `previa_vista` | onde o mouse parou até a prévia tocar |
-| `CAT-RDCPOW-003` | `pedido_whatsapp` | conversão real, peça por peça |
+| Cartão | Nome | Evento | Responde |
+|---|---|---|---|
+| `CAT-RC-001` | Ranking Cliques | `peca_aberta` | quais peças as pessoas abrem |
+| `CAT-RA-002` | Ranking Atenção | `previa_vista` | onde o mouse parou até a prévia tocar |
+| `CAT-RW-003` | Ranking WhatsApp | `pedido_whatsapp` | conversão real, peça por peça |
+
+O nome segue o esquema das peças — `CAT` de Catálogo, iniciais, número na
+sequência — com **duas regras que a primeira tentativa ensinou**: as palavras
+de ligação ficam fora das iniciais, e o nome do cartão tem duas ou três
+palavras. "Ranking do que mais chama atenção" virava `CAT-RDQMCA-002`, que
+ninguém lê; "Ranking Atenção" vira `CAT-RA-002`.
+
+`CAT-RA-002` só faz sentido ao lado de `CAT-RC-001`: peça que chama atenção e
+ninguém abre é problema do card, não da peça.
 
 Todos agrupam por `codigo` — é o que faz o ranking ordenar e cruzar entre os
 três cartões — em janela de 30 dias, excluindo o que vem de `localhost`.
