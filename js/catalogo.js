@@ -321,7 +321,7 @@
     // mínimo, que é o mesmo que não ter proporção nenhuma.
     var peso = Math.max(Math.sqrt(quantos), 1).toFixed(2);
     return '<button type="button" class="faixa" data-cat="' + escapa(slug) + '" '
-         + 'data-n="' + quantos + '" style="--peso:' + peso + '" aria-pressed="false">'
+         + 'style="--peso:' + peso + '" aria-pressed="false">'
          + '<span class="faixa-nome">' + escapa(nome) + '</span>'
          + '<span class="faixa-n mono">' + numero(quantos) + '</span>'
          + '</button>';
@@ -694,10 +694,13 @@
       if (!b) return;
       // clicar de novo na faixa acesa volta para o acervo inteiro
       categoriaAtiva = (b.dataset.cat === categoriaAtiva) ? '' : b.dataset.cat;
-      mede('filtrou', categoriaAtiva, Number(b.dataset.n || 0));
       marcaFaixaAtiva();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       filtra();
+      // depois de filtrar, não antes: clicar na faixa acesa desliga o
+      // recorte, e aí a contagem que vale é a do acervo inteiro, não a do
+      // botão que foi clicado
+      mede('filtrou', categoriaAtiva, visiveis.length);
     });
 
     // busca — espera a digitação parar antes de refazer a tela

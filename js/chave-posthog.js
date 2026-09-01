@@ -10,5 +10,5 @@
    Sem chave, nada é medido e nenhum byte sai do navegador.
    ============================================================ */
 
-window.POSTHOG_CHAVE = '';                              // cole o phc_... aqui
-window.POSTHOG_HOST = 'https://us.i.posthog.com';       // eu.i.posthog.com na Europa
+window.POSTHOG_CHAVE = 'phc_tybRNSdFspUuFeHkHBhTVF7ax5Tbxhfhewzwpo7LMJGN';
+window.POSTHOG_HOST = 'https://us.i.posthog.com';       // o projeto é da região US

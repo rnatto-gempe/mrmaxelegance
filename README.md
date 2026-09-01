@@ -410,7 +410,13 @@ chegam nos mesmos painéis.
 
 A chave mora sozinha em `js/chave-posthog.js`, lida pelas duas páginas:
 duas cópias da mesma chave é uma que fica velha. Ela é pública por natureza
-(vai no JavaScript de qualquer site que meça algo, e só permite escrita).
+(vai no JavaScript de qualquer site que meça algo, e só permite escrita) —
+por isso está versionada aqui sem cerimônia.
+
+O projeto é da **região US** (`us.i.posthog.com`). Para descobrir a região de
+um token, o endpoint de captura não serve: ele responde `Ok` em qualquer
+região, porque enfileira sem validar. Quem responde a verdade é
+`/array/<token>/config` — 200 na região do projeto, 404 na outra.
 
 **Sem chave, nada sai do navegador** — nenhuma requisição, nenhum byte. O
 mesmo vale para quem tem `doNotTrack` ligado. O visitante é um número
