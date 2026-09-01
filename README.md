@@ -408,6 +408,21 @@ quadro, a foto de 400 px nativos virava 691 px e **inflava a linha do grid**
 além da caixa — o botão de pedir saía da tela. O `max-height: 100%` não
 segura isso: numa linha dimensionada pelo conteúdo, o cálculo é circular.
 
+### Sessão e origem, sem SDK
+
+Duas coisas que a biblioteca do PostHog daria de graça e que aqui são dez
+linhas cada, em `js/metricas.js`:
+
+**Sessão.** Um id aleatório em `sessionStorage`, enviado como `$session_id`.
+O nome com `$` não é enfeite: é o que faz o PostHog agrupar os eventos em
+sessão sozinho, e sem ele não existe taxa de rejeição nem páginas por visita.
+
+**Origem.** `utm_source` e companhia saem da URL na primeira página e vão
+para a sessão. Isso não é zelo excessivo: o próprio catálogo reescreve o
+endereço ao gravar o filtro (`gravaEndereco`) e **apaga os `utm_` da barra**
+no primeiro clique — que é justamente antes de o pedido acontecer. Sem a
+cópia na sessão, toda conversão apareceria como tráfego direto.
+
 ### O código da peça: CAT-INICIAIS-NÚMERO
 
 `SEN-SDC-0375` é a 375ª peça do arquivo, Sensorial, "Smiley Dumplin' -
@@ -470,6 +485,7 @@ nem ordena; e ranking de eventos diferentes só cruza se a chave for a mesma.
 | Evento | Responde |
 |---|---|
 | `$pageview` | quantas visitas, e com qual faixa/termo na URL |
+| `pedido_whatsapp` | **as cinco portas** para o WhatsApp, com `origem`: ficha, topo, busca_vazia, rodape |
 | `busca` | o que procuram — e `sem_resultado: true` é **demanda que o acervo não atende** |
 | `faixa_filtrada` | qual seção o cliente realmente usa |
 | `peca_aberta` | quais peças despertam interesse |
@@ -491,22 +507,31 @@ chamadas passam por um atalho que não faz nada.
 
 ### Os painéis no PostHog
 
-Painel **CAT-PC-000** (projeto 588514, região US), em seis cartões e duas
-alturas de leitura: em cima o público, embaixo as peças.
+Painel **CAT-PC-000** (projeto 588514, região US), em nove cartões lidos de
+cima para baixo — do público ao produto:
 
 | Cartão | Nome | Consulta | Responde |
 |---|---|---|---|
 | `CAT-VD-004` | Visitas Dia | Trends, linha | acessos e visitantes únicos por dia |
 | `CAT-NR-005` | Novos Recorrentes | **Lifecycle** | lead novo contra quem volta |
+| `CAT-FP-007` | Funil Pedido | **Funnels** | onde a visita se perde |
+| `CAT-OT-009` | Origem Tráfego | Trends, pizza | de onde vêm os visitantes |
 | `CAT-FV-006` | Frequência Visitas | **Stickiness** | em quantos dias distintos cada pessoa voltou |
+| `CAT-BV-008` | Buscas Vazias | Trends, barras | **o que procuram e o acervo não tem** |
 | `CAT-RC-001` | Ranking Cliques | Trends, barras | quais peças as pessoas abrem |
 | `CAT-RA-002` | Ranking Atenção | Trends, barras | onde o mouse parou até a prévia tocar |
 | `CAT-RW-003` | Ranking WhatsApp | Trends, barras | conversão real, peça por peça |
 
 O layout é explícito, gravado nos `layouts.sm` de cada tile numa grade de 12
-colunas: as duas linhas do topo ocupam meia largura cada, a frequência ocupa
-a largura inteira, e os três rankings ficam em um terço cada — menores, como
-convém a detalhe.
+colunas: público no topo, funil e origem no meio, buscas vazias em faixa
+inteira, e os três rankings em um terço cada — menores, como convém a
+detalhe.
+
+`CAT-FP-007` é o cartão que diz **onde** perde, não só quanto: queda do
+primeiro para o segundo passo é problema de mosaico (ninguém achou o que
+queria); do segundo para o terceiro, é ficha ou preço. E `CAT-BV-008` é o de
+maior valor comercial do painel — cada linha é um cliente que procurou algo
+que você não oferece.
 
 **Novo contra recorrente não se faz com Trends.** A tentação é contar
 visitantes únicos e comparar; o certo é `LifecycleQuery`, que existe para
