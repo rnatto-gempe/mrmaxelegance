@@ -157,9 +157,9 @@
   // O catálogo funciona sem medição nenhuma: se `js/metricas.js` não estiver
   // na página, ou se a chave estiver vazia, isto vira uma função que não faz
   // nada — e nenhuma chamada abaixo precisa saber disso.
-  function mede(qual, a, b) {
+  function mede(qual, a, b, c) {
     var m = window.medidas;
-    if (m && typeof m[qual] === 'function') m[qual](a, b);
+    if (m && typeof m[qual] === 'function') m[qual](a, b, c);
   }
 
   /* ------------------------------------------------------------
@@ -845,12 +845,35 @@
     elFicha.addEventListener('click', function (e) {
       if (e.target === elFicha) fechaFicha();
     });
-    // O pedido é a única conversão que este site tem. O evento vai por
-    // `sendBeacon`, que entrega mesmo com a página já saindo para o
-    // WhatsApp — e o clique segue seu caminho sem esperar por nada.
-    elFicha.querySelector('.ficha-acao a').addEventListener('click', function () {
-      if (fichaAberta >= 0) mede('pediu', visiveis[fichaAberta], 'ficha');
-    });
+    /* O pedido é a única conversão que este site tem, e ele sai por cinco
+       portas: a ficha, o botão do topo, o CTA de "nada encontrado", o do
+       erro de carregamento e o telefone do rodapé. Só a ficha era medida —
+       as outras quatro viravam pedido sem aparecer em relatório nenhum.
+
+       Um ouvinte no documento cobre as cinco, inclusive as que nascem
+       depois (o CTA de busca vazia é desenhado na hora). O evento vai por
+       `sendBeacon`, que entrega mesmo com a página saindo para o WhatsApp,
+       e o clique segue seu caminho sem esperar por nada. */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href*="wa.me"]');
+      if (!a) return;
+
+      if (a.closest('.ficha-acao')) {
+        if (fichaAberta >= 0) mede('pediu', visiveis[fichaAberta], 'ficha');
+        return;
+      }
+
+      var onde = a.closest('.vazio') ? 'busca_vazia'
+               : a.classList.contains('zap-topo') ? 'topo'
+               : a.closest('footer') ? 'rodape'
+               : 'outro';
+
+      mede('pediu', null, onde, {
+        faixa: categoriaAtiva || '(todas)',
+        termo: termo || '',
+        resultados: visiveis.length
+      });
+    }, true);
 
     elFicha.querySelector('.ficha-fechar').addEventListener('click', fechaFicha);
     elFicha.querySelector('.ficha-passo.ant').addEventListener('click', function () { passa(-1); });

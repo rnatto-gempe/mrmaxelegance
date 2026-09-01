@@ -26,12 +26,12 @@
      um pedido só, disparado no <head>, que o js/catalogo.js consome depois.
      Não há duas pontas para dessincronizar. -->
 <script>window.catalogoAdiantado =
-  fetch('assets/catalogo.json?v=20260901d').then(function (r) {
+  fetch('assets/catalogo.json?v=20260901f').then(function (r) {
     if (!r.ok) throw new Error('catálogo indisponível (' + r.status + ')');
     return r.json();
   });</script>
-<link rel="stylesheet" href="css/fontes.css?v=20260901d">
-<link rel="stylesheet" href="css/catalogo.css?v=20260901d">
+<link rel="stylesheet" href="css/fontes.css?v=20260901f">
+<link rel="stylesheet" href="css/catalogo.css?v=20260901f">
 </head>
 <body>
 
@@ -144,8 +144,8 @@
   </div>
 </footer>
 
-<script src="js/chave-posthog.js?v=20260901d" defer></script>
-<script src="js/metricas.js?v=20260901d" defer></script>
-<script src="js/catalogo.js?v=20260901d" defer></script>
+<script src="js/chave-posthog.js?v=20260901f" defer></script>
+<script src="js/metricas.js?v=20260901f" defer></script>
+<script src="js/catalogo.js?v=20260901f" defer></script>
 </body>
 </html>

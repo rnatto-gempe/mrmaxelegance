@@ -46,6 +46,49 @@
     return novo;
   }());
 
+  /* ------------------------------------------------------------
+     A sessão, sem SDK
+
+     Sem a biblioteca do PostHog não existe `$session_id` — e sem ele não há
+     sessão, nem taxa de rejeição, nem páginas por visita. São dez linhas:
+     um id aleatório em `sessionStorage`, que a aba esquece ao fechar. O
+     nome com `$` não é enfeite: é assim que o PostHog reconhece o campo e
+     agrupa os eventos sozinho.
+     ------------------------------------------------------------ */
+  var SESSAO = (function () {
+    var novo = 'mms-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
+    try {
+      var salvo = sessionStorage.getItem('mm_sessao');
+      if (salvo) return salvo;
+      sessionStorage.setItem('mm_sessao', novo);
+    } catch (e) { /* aba privada */ }
+    return novo;
+  }());
+
+  /* ------------------------------------------------------------
+     De onde a pessoa veio
+
+     O `utm_source` está na URL da primeira página e desaparece na segunda —
+     e é justamente na segunda que o pedido acontece. Guardar na sessão faz
+     a origem chegar junto do evento que importa. O PostHog reconhece estes
+     nomes sem prefixo e já os usa nos painéis prontos.
+     ------------------------------------------------------------ */
+  var ORIGEM = (function () {
+    var campos = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+    var achado = {};
+    try {
+      var p = new URLSearchParams(location.search);
+      campos.forEach(function (c) { if (p.get(c)) achado[c] = p.get(c); });
+      var guardado = sessionStorage.getItem('mm_origem');
+      if (Object.keys(achado).length) {
+        sessionStorage.setItem('mm_origem', JSON.stringify(achado));
+      } else if (guardado) {
+        achado = JSON.parse(guardado);
+      }
+    } catch (e) { /* sem armazenamento: vale só a página atual */ }
+    return achado;
+  }());
+
   function manda(evento, props) {
     if (!ligado) return;
 
@@ -65,6 +108,11 @@
     corpo.properties.$referrer = document.referrer || '$direct';
     corpo.properties.$lib = 'mrmax-leve';
     corpo.properties.$screen_width = janela.innerWidth;
+    corpo.properties.$session_id = SESSAO;
+
+    for (var o in ORIGEM) {
+      if (Object.prototype.hasOwnProperty.call(ORIGEM, o)) corpo.properties[o] = ORIGEM[o];
+    }
 
     for (var k in (props || {})) {
       if (Object.prototype.hasOwnProperty.call(props, k)) corpo.properties[k] = props[k];
@@ -162,8 +210,15 @@
       manda('previa_vista', daPeca(it));
     },
 
-    pediu: function (it, de) {
-      manda('pedido_whatsapp', daPeca(it, { origem: de }));
+    // `it` pode faltar: o botão do topo, o rodapé e o CTA de "nada
+    // encontrado" levam ao mesmo WhatsApp sem peça escolhida. Eles contam
+    // como pedido — e ficavam fora da conta antes.
+    pediu: function (it, de, contexto) {
+      var props = it ? daPeca(it, { origem: de }) : { origem: de, peca: '(sem peça)' };
+      for (var k in (contexto || {})) {
+        if (Object.prototype.hasOwnProperty.call(contexto, k)) props[k] = contexto[k];
+      }
+      manda('pedido_whatsapp', props);
     }
   };
 }(window));
