@@ -491,13 +491,33 @@ chamadas passam por um atalho que não faz nada.
 
 ### Os painéis no PostHog
 
-Painel **CAT-PC-000** (projeto 588514, região US), com três cartões:
+Painel **CAT-PC-000** (projeto 588514, região US), em seis cartões e duas
+alturas de leitura: em cima o público, embaixo as peças.
 
-| Cartão | Nome | Evento | Responde |
+| Cartão | Nome | Consulta | Responde |
 |---|---|---|---|
-| `CAT-RC-001` | Ranking Cliques | `peca_aberta` | quais peças as pessoas abrem |
-| `CAT-RA-002` | Ranking Atenção | `previa_vista` | onde o mouse parou até a prévia tocar |
-| `CAT-RW-003` | Ranking WhatsApp | `pedido_whatsapp` | conversão real, peça por peça |
+| `CAT-VD-004` | Visitas Dia | Trends, linha | acessos e visitantes únicos por dia |
+| `CAT-NR-005` | Novos Recorrentes | **Lifecycle** | lead novo contra quem volta |
+| `CAT-FV-006` | Frequência Visitas | **Stickiness** | em quantos dias distintos cada pessoa voltou |
+| `CAT-RC-001` | Ranking Cliques | Trends, barras | quais peças as pessoas abrem |
+| `CAT-RA-002` | Ranking Atenção | Trends, barras | onde o mouse parou até a prévia tocar |
+| `CAT-RW-003` | Ranking WhatsApp | Trends, barras | conversão real, peça por peça |
+
+O layout é explícito, gravado nos `layouts.sm` de cada tile numa grade de 12
+colunas: as duas linhas do topo ocupam meia largura cada, a frequência ocupa
+a largura inteira, e os três rankings ficam em um terço cada — menores, como
+convém a detalhe.
+
+**Novo contra recorrente não se faz com Trends.** A tentação é contar
+visitantes únicos e comparar; o certo é `LifecycleQuery`, que existe para
+isso e separa quatro estados por dia: *new* (primeira visita), *returning*
+(veio também no período anterior), *resurrecting* (ficou fora e voltou) e
+*dormant* (parou de vir — desenhado abaixo do zero, de propósito). E
+frequência é `StickinessQuery`: barra alta à esquerda é gente de passagem
+única, peso à direita é público que volta.
+
+Os rankings mostram **top 10** com o valor na barra. Antes eram 25, o que não
+cabe num cartão de um terço de largura.
 
 O nome segue o esquema das peças — `CAT` de Catálogo, iniciais, número na
 sequência — com **duas regras que a primeira tentativa ensinou**: as palavras
