@@ -343,8 +343,11 @@
     var s = el.palco.querySelector('.slide[data-i="' + i + '"]');
     if (!s) return;
     el.palco.scrollTo({ left: s.offsetLeft, behavior: modo || (reduz.matches ? 'auto' : 'smooth') });
-    // sem esperar o observador: no salto sem animação ele pode nem disparar
-    if (modo === 'auto') chegouEm(i);
+    // O destino é conhecido, então o estado muda já — a imagem alcança.
+    // Esperar o observador falharia no salto sem animação (ele pode nem
+    // disparar) e na aba em segundo plano (nada é desenhado até voltar).
+    // O observador continua mandando quando é o dedo que desliza.
+    chegouEm(i);
   }
 
   /* ------------------------------------------------------------
