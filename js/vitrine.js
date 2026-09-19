@@ -49,6 +49,13 @@
   var CHAVE_MIDIA = 'mrmax.vitrine.midia';
   var midiaPreferida = 'previa';
 
+  /* Publicar: a seleção deste aparelho vira coleção no site, gravada em
+     assets/vitrine.json pela API do GitHub (js/publica.js). `editando`
+     lembra qual coleção foi mandada ao catálogo para ajuste, para que a
+     publicação seguinte a substitua em vez de criar outra. */
+  var CHAVE_EDITANDO = 'mrmax.vitrine.editando';
+  var pecasParaPublicar = [];
+
   var el = {};
   var reduz = window.matchMedia('(prefers-reduced-motion: reduce)');
   var observador = null;
@@ -68,6 +75,15 @@
 
   function semAcento(txt) {
     return String(txt).normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  // "Feira de Outubro" -> "feira-de-outubro": o slug que vai na URL
+  function slugDe(txt) {
+    return semAcento(txt).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  }
+
+  function podePublicar() {
+    return !!(window.publica && window.publica.temChave());
   }
 
   function nomeCategoria(i) {
@@ -212,13 +228,241 @@
            + '<img src="assets/catalogo/' + p.id + '.webp" alt="" loading="lazy" decoding="async"></span>';
     }).join('');
     var n = itens.length;
-    return '<button type="button" class="colecao' + (c.propria ? ' propria' : '') + '" '
+
+    // as ações só existem no aparelho que tem a chave de publicação
+    var acoes = '';
+    if (podePublicar()) {
+      acoes = c.propria
+        ? '<button type="button" class="colecao-acao destaque" data-acao="publicar">Publicar no site</button>'
+          + '<button type="button" class="colecao-acao apaga" data-acao="descartar">Descartar</button>'
+        : '<button type="button" class="colecao-acao" data-acao="editar">Editar no catálogo</button>'
+          + '<button type="button" class="colecao-acao apaga" data-acao="excluir">Excluir</button>';
+    }
+
+    return '<div class="colecao' + (c.propria ? ' propria' : '') + '" '
          + 'data-slug="' + escapa(c.slug) + '" data-ids="' + (c.propria ? escapa(c.pecas.join(',')) : '') + '">'
+         + '<button type="button" class="colecao-abrir">'
          + '<span class="colecao-fotos">' + fotos + '</span>'
          + '<span><span class="colecao-tit">' + escapa(c.titulo) + '</span>'
          + '<p class="colecao-sub">' + escapa(c.sub || '') + '</p>'
          + '<span class="colecao-n">' + numero(n) + (n === 1 ? ' PEÇA' : ' PEÇAS') + '</span></span>'
-         + '</button>';
+         + '</button>'
+         + (acoes ? '<div class="colecao-acoes">' + acoes + '</div>' : '')
+         + '</div>';
+  }
+
+  /* ------------------------------------------------------------
+     Publicar — a seleção vira coleção no site
+
+     O caminho inteiro é: ler o vitrine.json que está no repositório,
+     trocar ou acrescentar a coleção, gravar de volta. Ler antes de gravar
+     é o que evita apagar uma coleção que outro aparelho publicou.
+     ------------------------------------------------------------ */
+
+  function acaoColecao(acao, slug, ids) {
+    if (acao === 'publicar') {
+      abrePublicar(ids ? ids.split(',') : []);
+    } else if (acao === 'descartar') {
+      if (!window.confirm('Descartar a seleção montada neste aparelho?')) return;
+      guarda(CHAVE_SELECAO, []);
+      guarda(CHAVE_EDITANDO, null);
+      montaInicio();
+    } else if (acao === 'editar') {
+      var c = colecaoPorSlug(slug);
+      if (!c) return;
+      // a coleção vira a seleção do catálogo; ao publicar, ela é substituída
+      guarda(CHAVE_SELECAO, c.pecas);
+      guarda(CHAVE_EDITANDO, { slug: c.slug, titulo: c.titulo, sub: c.sub || '' });
+      location.href = 'catalogo.html?montar=1';
+    } else if (acao === 'excluir') {
+      var e = colecaoPorSlug(slug);
+      if (!e || !window.confirm('Excluir a coleção "' + e.titulo + '" do site?')) return;
+      excluiColecao(slug);
+    }
+  }
+
+  function colecaoPorSlug(slug) {
+    for (var i = 0; i < colecoes.length; i++) if (colecoes[i].slug === slug) return colecoes[i];
+    return null;
+  }
+
+  function abrePublicar(ids) {
+    pecasParaPublicar = resolve(ids);
+    if (!pecasParaPublicar.length) { avisa('Não há peça para publicar'); return; }
+
+    var n = pecasParaPublicar.length;
+    el.pubN.textContent = numero(n) + (n === 1 ? ' peça' : ' peças');
+
+    var ed = le(CHAVE_EDITANDO);
+    el.pubTitulo.value = ed ? ed.titulo : '';
+    el.pubSub.value = ed ? ed.sub : '';
+    el.pubSlug.value = ed ? ed.slug : '';
+    el.pubSlug.dataset.manual = ed ? '1' : '';
+    estadoPub('');
+    el.pubEnviar.disabled = false;
+
+    fechaPainel('lista'); fechaPainel('grade');
+    abrePainel('publicar');
+    el.pubTitulo.focus();
+  }
+
+  function estadoPub(txt, tipo) {
+    el.pubEstado.textContent = txt;
+    el.pubEstado.className = 'dialogo-estado' + (tipo ? ' ' + tipo : '');
+  }
+
+  function avisaSubstituicao() {
+    var slug = el.pubSlug.value.trim();
+    var existe = colecaoPorSlug(slug);
+    if (existe) estadoPub('Vai substituir a coleção "' + existe.titulo + '", que já está no site.');
+    else estadoPub('');
+  }
+
+  function publicaColecao(ev) {
+    ev.preventDefault();
+    var titulo = el.pubTitulo.value.trim();
+    if (!titulo) { estadoPub('Dê um nome à coleção.', 'erro'); el.pubTitulo.focus(); return; }
+    var slug = slugDe(el.pubSlug.value.trim() || titulo);
+    if (!slug) { estadoPub('O endereço precisa ter letras ou números.', 'erro'); return; }
+    var sub = el.pubSub.value.trim();
+    var ids = pecasParaPublicar.map(function (p) { return p.id; });
+
+    el.pubEnviar.disabled = true;
+    estadoPub('Gravando no site…');
+
+    window.publica.leArquivo()
+      .then(function (arq) {
+        var json;
+        try { json = JSON.parse(arq.texto); } catch (e) { throw new Error('o vitrine.json do site está ilegível'); }
+        json.versao = json.versao || 1;
+        json.colecoes = json.colecoes || [];
+        var nova = { slug: slug, titulo: titulo, sub: sub, pecas: ids };
+        var i = -1;
+        json.colecoes.forEach(function (c, k) { if (c.slug === slug) i = k; });
+        if (i >= 0) json.colecoes[i] = nova; else json.colecoes.push(nova);
+        var msg = 'Vitrine: ' + (i >= 0 ? 'atualiza' : 'nova coleção') + ' "' + titulo + '" ('
+                + ids.length + (ids.length === 1 ? ' peça' : ' peças') + '), publicada pela vitrine';
+        return window.publica.gravaArquivo(serializaVitrine(json), arq.sha, msg).then(function () { return json; });
+      })
+      .then(function (json) {
+        colecoes = json.colecoes;
+        guarda(CHAVE_SELECAO, []);
+        guarda(CHAVE_EDITANDO, null);
+        fechaPainel('publicar');
+        montaInicio();
+        abreInicio();
+        avisa('Publicada! Entra no site em um ou dois minutos');
+      })
+      .catch(function (e) {
+        el.pubEnviar.disabled = false;
+        estadoPub('Não deu para publicar: ' + explicaErro(e), 'erro');
+      });
+  }
+
+  function excluiColecao(slug) {
+    avisa('Excluindo…');
+    window.publica.leArquivo()
+      .then(function (arq) {
+        var json = JSON.parse(arq.texto);
+        var titulo = slug;
+        json.colecoes = (json.colecoes || []).filter(function (c) {
+          if (c.slug === slug) { titulo = c.titulo; return false; }
+          return true;
+        });
+        return window.publica.gravaArquivo(serializaVitrine(json), arq.sha,
+          'Vitrine: exclui a coleção "' + titulo + '", pela vitrine').then(function () { return json; });
+      })
+      .then(function (json) {
+        colecoes = json.colecoes;
+        montaInicio();
+        avisa('Coleção excluída');
+      })
+      .catch(function (e) { avisa('Não deu para excluir: ' + explicaErro(e)); });
+  }
+
+  function explicaErro(e) {
+    if (e && e.status === 401) return 'a chave está errada ou venceu. Conecte de novo.';
+    if (e && e.status === 403) return 'a chave não tem permissão de escrita neste repositório.';
+    if (e && e.status === 404) return 'o arquivo ou o repositório não foi encontrado.';
+    if (e && e.status === 409) return 'o arquivo mudou enquanto você editava. Tente de novo.';
+    return (e && e.message) || 'erro desconhecido';
+  }
+
+  // O arquivo é lido por gente, no GitHub. Sai no mesmo formato em que foi
+  // escrito à mão: uma coleção por bloco, a lista de peças numa linha só.
+  function serializaVitrine(json) {
+    var blocos = (json.colecoes || []).map(function (c) {
+      return '    {\n'
+           + '      "slug": ' + JSON.stringify(c.slug) + ',\n'
+           + '      "titulo": ' + JSON.stringify(c.titulo) + ',\n'
+           + '      "sub": ' + JSON.stringify(c.sub || '') + ',\n'
+           + '      "pecas": [' + (c.pecas || []).join(', ') + ']\n'
+           + '    }';
+    });
+    return '{\n  "versao": ' + (json.versao || 1) + ',\n  "colecoes": [\n'
+         + blocos.join(',\n') + '\n  ]\n}\n';
+  }
+
+  /* ------------------------------------------------------------
+     A conta — a chave que permite publicar
+     ------------------------------------------------------------ */
+
+  function atualizaConta() {
+    var tem = podePublicar();
+    el.contaEstado.textContent = tem
+      ? 'Este aparelho publica no site'
+      : 'Este aparelho ainda não publica no site';
+    el.btnConta.textContent = tem ? 'Conta' : 'Conectar';
+    el.contaEstado.closest('.publicacao').classList.toggle('ligada', tem);
+    el.btnDesconectar.hidden = !tem;
+    el.btnPublicar.hidden = !(tem && colecao && (colecao.avulsa || colecao.propria));
+  }
+
+  function abreConta() {
+    el.contaChave.value = '';
+    el.contaEstadoIn.textContent = podePublicar() ? 'Há uma chave guardada neste aparelho.' : '';
+    el.contaEstadoIn.className = 'dialogo-estado';
+    el.contaEnviar.disabled = false;
+    abrePainel('conta');
+    if (!podePublicar()) el.contaChave.focus();
+  }
+
+  function conectaConta(ev) {
+    ev.preventDefault();
+    var t = el.contaChave.value.trim();
+    if (!t) { el.contaEstadoIn.textContent = 'Cole a chave primeiro.'; el.contaEstadoIn.className = 'dialogo-estado erro'; return; }
+    el.contaEnviar.disabled = true;
+    el.contaEstadoIn.textContent = 'Conferindo…';
+    el.contaEstadoIn.className = 'dialogo-estado';
+
+    var anterior = window.publica.temChave();
+    window.publica.guardaChave(t);
+    window.publica.confere()
+      .then(function (r) {
+        if (!r.escreve) throw new Error('a chave de ' + r.usuario + ' não pode escrever neste repositório. Falta a permissão Contents: Read and write.');
+        el.contaEstadoIn.textContent = 'Conectado como ' + r.usuario + '. Este aparelho já publica.';
+        el.contaEstadoIn.className = 'dialogo-estado ok';
+        el.contaChave.value = '';
+        atualizaConta();
+        montaInicio();
+        setTimeout(function () { fechaPainel('conta'); }, 900);
+      })
+      .catch(function (e) {
+        if (!anterior) window.publica.guardaChave('');
+        el.contaEnviar.disabled = false;
+        el.contaEstadoIn.textContent = 'Não deu: ' + explicaErro(e);
+        el.contaEstadoIn.className = 'dialogo-estado erro';
+        atualizaConta();
+      });
+  }
+
+  function desconectaConta() {
+    if (!window.confirm('Tirar a chave deste aparelho? Ele deixa de publicar.')) return;
+    window.publica.guardaChave('');
+    atualizaConta();
+    montaInicio();
+    fechaPainel('conta');
+    avisa('Chave removida');
   }
 
   function abreInicio() {
@@ -251,6 +495,7 @@
     el.inicio.setAttribute('data-aberto', 'nao');
     fechaPainel('grade');
     document.body.setAttribute('data-tela', 'palco');
+    atualizaConta();
 
     // sem animar: é uma coleção nova, não um passo. `chegouEm` grava o
     // endereço; se a coleção veio vazia, grava-se aqui.
@@ -605,8 +850,10 @@
   }
 
   function painelAberto() {
-    if (el.grade.getAttribute('data-aberto') === 'sim') return 'grade';
-    if (el.lista.getAttribute('data-aberto') === 'sim') return 'lista';
+    var nomes = ['publicar', 'conta', 'grade', 'lista'];
+    for (var i = 0; i < nomes.length; i++) {
+      if (el[nomes[i]].getAttribute('data-aberto') === 'sim') return nomes[i];
+    }
     return '';
   }
 
@@ -663,13 +910,39 @@
      ------------------------------------------------------------ */
 
   function liga() {
-    // início: escolher coleção
+    // início: escolher coleção, ou publicar / editar / excluir
     el.colecoes.addEventListener('click', function (e) {
-      var b = e.target.closest('.colecao');
+      var a = e.target.closest('.colecao-acao');
+      if (a) {
+        var card = a.closest('.colecao');
+        acaoColecao(a.dataset.acao, card.dataset.slug, card.dataset.ids);
+        return;
+      }
+      var b = e.target.closest('.colecao-abrir');
       if (!b) return;
-      if (b.dataset.ids) abreAvulsa(b.dataset.ids.split(','));
-      else abrePorSlug(b.dataset.slug);
+      var c = b.closest('.colecao');
+      if (c.dataset.ids) abreAvulsa(c.dataset.ids.split(','));
+      else abrePorSlug(c.dataset.slug);
     });
+
+    // publicar a seleção aberta no palco (a que veio do catálogo por ?p=)
+    el.btnPublicar.addEventListener('click', function () {
+      abrePublicar(pecas.map(function (p) { return p.id; }));
+    });
+    el.pubForm.addEventListener('submit', publicaColecao);
+    el.pubTitulo.addEventListener('input', function () {
+      if (!el.pubSlug.dataset.manual) el.pubSlug.value = slugDe(el.pubTitulo.value);
+      avisaSubstituicao();
+    });
+    el.pubSlug.addEventListener('input', function () {
+      el.pubSlug.dataset.manual = el.pubSlug.value ? '1' : '';
+      avisaSubstituicao();
+    });
+
+    // a conta
+    el.btnConta.addEventListener('click', abreConta);
+    el.contaForm.addEventListener('submit', conectaConta);
+    el.btnDesconectar.addEventListener('click', desconectaConta);
 
     el.btnInicio.addEventListener('click', function () {
       fechaPainel('grade'); fechaPainel('lista');
@@ -775,12 +1048,16 @@
   function comeca() {
     ['palco', 'trilho', 'inicio', 'colecoes', 'grade', 'gradeIn', 'gradeTit', 'lista', 'listaItens',
      'listaVazia', 'listaN', 'nomeCliente', 'btnInicio', 'btnGrade', 'btnTela', 'btnLista', 'btnPedido',
-     'btnCliente', 'btnLimpar', 'setaAnt', 'setaPro', 'topoNome', 'topoSub', 'topoN', 'aviso']
+     'btnCliente', 'btnLimpar', 'setaAnt', 'setaPro', 'topoNome', 'topoSub', 'topoN', 'aviso',
+     'btnPublicar', 'btnConta', 'contaEstado', 'publicar', 'pubForm', 'pubTitulo', 'pubSub', 'pubSlug',
+     'pubN', 'pubEstado', 'pubEnviar', 'conta', 'contaForm', 'contaChave', 'contaEstadoIn', 'contaEnviar',
+     'btnDesconectar']
       .forEach(function (id) { el[id] = document.getElementById(id); });
 
     carregaLista();
     midiaPreferida = le(CHAVE_MIDIA) === 'recorte' ? 'recorte' : 'previa';
     liga();
+    atualizaConta();
 
     var acervoChegando = window.acervoAdiantado || fetch(ARQ_ACERVO).then(function (r) { return r.json(); });
     var vitrineChegando = window.vitrineAdiantada || fetch(ARQ_VITRINE).then(function (r) { return r.json(); });

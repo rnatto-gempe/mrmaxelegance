@@ -29,13 +29,16 @@ window.acervoAdiantado = fetch('assets/catalogo.json?v=20260901f').then(function
   if (!r.ok) throw new Error('acervo indisponível (' + r.status + ')');
   return r.json();
 });
-window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919b').then(function (r) {
+/* Sem `?v=` fixo: as coleções são publicadas pelo celular, a qualquer hora,
+   e um número de versão gravado aqui ficaria velho no mesmo instante.
+   `no-cache` faz o navegador revalidar com o servidor a cada abertura. */
+window.vitrineAdiantada = fetch('assets/vitrine.json', { cache: 'no-cache' }).then(function (r) {
   if (!r.ok) throw new Error('vitrine indisponível (' + r.status + ')');
   return r.json();
 });
 </script>
-<link rel="stylesheet" href="css/fontes.css?v=20260919b">
-<link rel="stylesheet" href="css/vitrine.css?v=20260919b">
+<link rel="stylesheet" href="css/fontes.css?v=20260919c">
+<link rel="stylesheet" href="css/vitrine.css?v=20260919c">
 </head>
 <body data-tela="inicio">
 
@@ -51,6 +54,11 @@ window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919b').then(function
   </div>
 
   <div class="topo-acoes">
+    <button type="button" class="acao acao-publicar" id="btnPublicar" aria-label="Publicar esta seleção no site" title="Publicar no site" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+      </svg>
+    </button>
     <button type="button" class="acao" id="btnGrade" aria-label="Ver todas as peças da coleção" title="Ver todas (G)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
@@ -92,9 +100,79 @@ window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919b').then(function
     <p class="inicio-txt">Cada coleção é uma seleção curta do acervo. Abra uma, deslize de lado e marque
       as peças que a pessoa gostou — a lista vai pronta para o WhatsApp.</p>
     <div class="colecoes" id="colecoes"></div>
+
+    <!-- Publicação: o aparelho que tem a chave grava as coleções no site. -->
+    <div class="publicacao">
+      <span class="publicacao-txt">
+        <b id="contaEstado">Este aparelho ainda não publica no site</b>
+        <small>Com a chave conectada, a seleção montada aqui vira uma coleção para todo mundo.</small>
+      </span>
+      <button type="button" class="botao-linha" id="btnConta">Conectar</button>
+    </div>
+
     <p class="inicio-nota">Quer outra seleção? <a href="catalogo.html?montar=1">Monte uma vitrine nova no catálogo</a>:
       toque nas peças e abra aqui.</p>
   </div>
+</section>
+
+<!-- Publicar: a seleção vira coleção no site. -->
+<section class="painel dialogo" id="publicar" data-aberto="nao" role="dialog" aria-modal="true" aria-label="Publicar coleção">
+  <form class="dialogo-caixa" id="pubForm" novalidate>
+    <div class="painel-cab">
+      <span class="painel-tit">Publicar no site</span>
+      <button type="button" class="fechar" data-fecha="publicar" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="dialogo-in">
+      <p class="dialogo-txt"><b id="pubN">0 peças</b> vão para uma coleção que aparece na tela inicial da vitrine, em qualquer aparelho.</p>
+      <label class="campo">
+        <span class="campo-rotulo mono">NOME DA COLEÇÃO</span>
+        <input type="text" id="pubTitulo" autocomplete="off" maxlength="60" placeholder="ex.: Feira de outubro" required>
+      </label>
+      <label class="campo">
+        <span class="campo-rotulo mono">UMA LINHA DE CONTEXTO (OPCIONAL)</span>
+        <input type="text" id="pubSub" autocomplete="off" maxlength="140" placeholder="ex.: O que levamos para a mesa da feira">
+      </label>
+      <label class="campo">
+        <span class="campo-rotulo mono">ENDEREÇO (SAI DO NOME)</span>
+        <input type="text" id="pubSlug" autocomplete="off" maxlength="40" spellcheck="false" pattern="[a-z0-9-]+">
+      </label>
+      <p class="dialogo-estado" id="pubEstado" aria-live="polite"></p>
+    </div>
+    <div class="lista-pe">
+      <button type="submit" class="botao-cheio" id="pubEnviar">Publicar</button>
+    </div>
+  </form>
+</section>
+
+<!-- Conta: a chave que permite publicar. -->
+<section class="painel dialogo" id="conta" data-aberto="nao" role="dialog" aria-modal="true" aria-label="Conta de publicação">
+  <form class="dialogo-caixa" id="contaForm" novalidate>
+    <div class="painel-cab">
+      <span class="painel-tit">Publicar deste aparelho</span>
+      <button type="button" class="fechar" data-fecha="conta" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="dialogo-in">
+      <p class="dialogo-txt">Cole aqui a chave de publicação. Ela fica guardada só neste aparelho e serve para gravar as coleções no site.</p>
+      <label class="campo">
+        <span class="campo-rotulo mono">CHAVE</span>
+        <input type="password" id="contaChave" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      </label>
+      <p class="dialogo-estado" id="contaEstadoIn" aria-live="polite"></p>
+      <details class="dialogo-ajuda">
+        <summary>Como criar a chave</summary>
+        <ol>
+          <li>No GitHub, em <b>Settings → Developer settings → Personal access tokens → Fine-grained tokens</b>, crie um token novo.</li>
+          <li>Em <b>Repository access</b>, escolha <b>Only select repositories</b> e marque <b>mrmaxelegance</b>.</li>
+          <li>Em <b>Permissions → Repository permissions</b>, dê <b>Contents: Read and write</b>. Nada mais.</li>
+          <li>Escolha a validade, gere, e cole a chave aqui. Ela começa com <code>github_pat_</code>.</li>
+        </ol>
+      </details>
+    </div>
+    <div class="lista-pe">
+      <button type="submit" class="botao-cheio" id="contaEnviar">Conectar</button>
+      <button type="button" class="botao-linha apaga" id="btnDesconectar" hidden>Desconectar este aparelho</button>
+    </div>
+  </form>
 </section>
 
 <!-- A grade: a coleção inteira numa tela só. -->
@@ -137,6 +215,7 @@ window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919b').then(function
 
 <p class="aviso" id="aviso" role="status" aria-live="polite"></p>
 
-<script src="js/vitrine.js?v=20260919b" defer></script>
+<script src="js/publica.js?v=20260919c" defer></script>
+<script src="js/vitrine.js?v=20260919c" defer></script>
 </body>
 </html>

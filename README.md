@@ -660,6 +660,39 @@ mesa. Cada coleção tem `slug` (vai na URL), `titulo`, `sub` (uma linha de cont
 do nome da imagem em `assets/catalogo/`. Uma peça que saiu do acervo é ignorada em
 silêncio; uma coleção que ficou sem peça nenhuma some da escolha.
 
+### Publicando coleções pelo celular
+
+O site não tem servidor, mas a vitrine grava as coleções direto no repositório, pela API
+de conteúdo do GitHub (`js/publica.js`). O aparelho que publica precisa de uma **chave**:
+um token de acesso pessoal granular, restrito a este repositório, só com
+`Contents: Read and write`. Ela fica no `localStorage` daquele aparelho e nunca entra no
+código — o repositório é público.
+
+Para conectar um celular: abra `vitrine.html`, toque em **Conectar** no bloco de
+publicação, cole a chave. A vitrine confere quem é a chave e se ela escreve no
+repositório antes de guardá-la. **Desconectar** apaga a chave do aparelho.
+
+Com a chave, a tela inicial ganha ações:
+
+| Onde | Ação | O que faz |
+|---|---|---|
+| **Minha seleção** | Publicar no site | Pede nome, uma linha de contexto e o endereço (sai do nome); grava em `assets/vitrine.json`. Se o endereço já existe, substitui a coleção. |
+| **Minha seleção** | Descartar | Zera a seleção do aparelho. |
+| Coleção publicada | Editar no catálogo | Carrega as peças da coleção na seleção e abre o catálogo em modo montar. Ao publicar de volta, a coleção é substituída — não duplicada. |
+| Coleção publicada | Excluir | Tira a coleção do site. |
+| Palco, com `?p=` | Botão de publicar no topo | Publica a seleção avulsa que veio do catálogo. |
+
+A gravação lê o arquivo do repositório, troca só a coleção em questão e grava de volta —
+por isso dois aparelhos podem publicar sem um apagar o do outro. Cada publicação vira um
+commit no `main` ("Vitrine: nova coleção …"). O GitHub Pages republica em um ou dois
+minutos; a vitrine busca `vitrine.json` com `cache: 'no-cache'`, então a coleção nova
+aparece na próxima abertura, sem `?v=` para trocar.
+
+Criando a chave, no GitHub: Settings → Developer settings → Personal access tokens →
+Fine-grained tokens → Generate new token. Em *Repository access*, **Only select
+repositories** → `mrmaxelegance`. Em *Permissions → Repository*, **Contents: Read and
+write**. Escolha a validade (a chave vence, e aí é só gerar outra e conectar de novo).
+
 ### Montando uma seleção pelo catálogo
 
 `catalogo.html?montar=1` (ou o link **Montar vitrine** no rodapé do catálogo) troca o
