@@ -638,3 +638,56 @@ qual eles seguem vazios.
 
 Para publicar, coloque o arquivo em `assets/` e insira a `<img>` **antes** do
 `<span class="slot-txt">`; o texto-guia some sozinho quando existe imagem.
+
+## A vitrine presencial
+
+`vitrine.html` é o catálogo para mostrar **na mão de alguém**: uma seleção curta, uma peça
+por tela, deslizando de lado, com o vídeo da peça tocando sozinho. Não tem busca nem
+categorias — tem a coleção aberta e um coração para anotar o que a pessoa gostou.
+A página é `noindex`, como o catálogo.
+
+| Endereço | O que abre |
+|---|---|
+| `vitrine.html` | A escolha da coleção. Se este aparelho montou uma seleção no catálogo, ela aparece primeiro como **Minha seleção**. |
+| `vitrine.html?c=casa` | Uma coleção de `assets/vitrine.json`, pelo `slug`. |
+| `vitrine.html?p=4324,4048,3853` | Uma seleção avulsa, pelos ids das peças — é o link que o catálogo gera. `#3` no fim abre na terceira peça. |
+
+### As coleções
+
+Ficam em `assets/vitrine.json`, e editar o arquivo é o jeito de mudar o que vai para a
+mesa. Cada coleção tem `slug` (vai na URL), `titulo`, `sub` (uma linha de contexto) e
+`pecas` (a lista de ids, na ordem de exibição). O id é o `MM-<número>` da peça, o mesmo
+do nome da imagem em `assets/catalogo/`. Uma peça que saiu do acervo é ignorada em
+silêncio; uma coleção que ficou sem peça nenhuma some da escolha.
+
+### Montando uma seleção pelo catálogo
+
+`catalogo.html?montar=1` (ou o link **Montar vitrine** no rodapé do catálogo) troca o
+gesto do mosaico: o toque **marca** a peça em vez de abrir a ficha, e uma barra embaixo
+conta, copia o link (`vitrine.html?p=…`) e abre a vitrine. A busca e as categorias
+continuam funcionando, então dá para montar "vitrine de Natal" em um minuto. A seleção
+fica no navegador (`localStorage`), para continuar depois — e para a vitrine achá-la
+como **Minha seleção** sem link nenhum. **Sair** volta ao catálogo normal.
+
+### A lista do cliente
+
+Na vitrine, o coração anota a peça. A lista (ícone no topo, ou tecla `L`) mostra o que
+foi marcado, aceita o nome de quem está escolhendo e gera duas mensagens de WhatsApp:
+
+- **Mandar o pedido para a produção** — para o número da casa, com nome do cliente e
+  o código `CAT-INICIAIS-NÚMERO (MM-id)` de cada peça, o mesmo que o catálogo manda.
+- **Enviar a lista para o cliente** — sem número (o WhatsApp pergunta para quem), com
+  os nomes das peças e o link `vitrine.html?p=…` que reabre exatamente aquela seleção
+  no telefone dele.
+
+A lista também fica no navegador; **Limpar** zera para o próximo atendimento.
+
+### Atalhos
+
+`←` `→` andam, `espaço` anota, `G` abre a grade com todas as peças da coleção, `L` a
+lista, `F` a tela cheia, `Esc` fecha. No toque, o quadro da peça sem vídeo alterna
+entre o recorte e a foto de cena real.
+
+O código da peça é calculado em `js/vitrine.js` com **a mesma regra** de
+`js/catalogo.js` (tabela `PREFIXO`, ordem `ESPECIFICAS`, posição no `catalogo.json`).
+Se a regra mudar em um, muda no outro — a produção acha o pedido por esse código.

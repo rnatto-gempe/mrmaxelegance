@@ -30,8 +30,8 @@
     if (!r.ok) throw new Error('catálogo indisponível (' + r.status + ')');
     return r.json();
   });</script>
-<link rel="stylesheet" href="css/fontes.css?v=20260901f">
-<link rel="stylesheet" href="css/catalogo.css?v=20260901f">
+<link rel="stylesheet" href="css/fontes.css?v=20260919a">
+<link rel="stylesheet" href="css/catalogo.css?v=20260919a">
 </head>
 <body>
 
@@ -133,19 +133,39 @@
   </div>
 </div>
 
+<!-- A barra de montar a vitrine. Só aparece com ?montar=1 na URL: é uma
+     ferramenta da casa, para escolher as peças que a vitrine.html mostra
+     ao vivo. Fora desse modo, o CSS a esconde e o JS não a liga. -->
+<div class="barra-vitrine" id="barraVitrine" role="region" aria-label="Montando a vitrine">
+  <div class="barra-in">
+    <span class="barra-conta"><b class="barra-n mono">0</b> <span class="barra-rotulo">peças na vitrine</span>
+      <small>toque nas peças para marcar</small></span>
+    <div class="barra-acoes">
+      <button type="button" class="barra-botao barra-copiar" disabled>Copiar link</button>
+      <button type="button" class="barra-botao barra-limpar" disabled>Limpar</button>
+      <button type="button" class="barra-botao barra-sair" aria-label="Sair do modo de montar">Sair</button>
+      <a class="barra-abrir" href="vitrine.html" aria-disabled="true">Abrir vitrine
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
 <footer class="rodape">
   <div class="rodape-in">
     <span>MR MAX ELEGANCE · IMPRESSÃO 3D SOB MEDIDA</span>
     <nav class="rodape-links">
       <a href="index.html">Home</a>
       <a href="links.html">Todos os canais</a>
+      <a href="vitrine.html">Vitrine</a>
+      <a href="catalogo.html?montar=1">Montar vitrine</a>
       <a href="https://wa.me/5543996070804" target="_blank" rel="noopener">(43) 99607-0804</a>
     </nav>
   </div>
 </footer>
 
-<script src="js/chave-posthog.js?v=20260901f" defer></script>
-<script src="js/metricas.js?v=20260901f" defer></script>
-<script src="js/catalogo.js?v=20260901f" defer></script>
+<script src="js/chave-posthog.js?v=20260919a" defer></script>
+<script src="js/metricas.js?v=20260919a" defer></script>
+<script src="js/catalogo.js?v=20260919a" defer></script>
 </body>
 </html>

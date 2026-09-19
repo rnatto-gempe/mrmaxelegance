@@ -1,0 +1,35 @@
+{
+  "versao": 1,
+  "colecoes": [
+    {
+      "slug": "destaques",
+      "titulo": "Destaques",
+      "sub": "As peças que mais chamam atenção na mesa: uma de cada tipo, para abrir a conversa.",
+      "pecas": [4324, 4048, 3853, 4234, 4338, 4206, 3950, 4205, 4204, 2954, 4292, 4191, 2608, 4072, 3157, 2465, 1682, 3916, 4237, 2199, 1902, 3463, 3904, 4098]
+    },
+    {
+      "slug": "casa",
+      "titulo": "Para a casa",
+      "sub": "Luminárias, vasos, organizadores e apoios: peça útil, que fica à vista.",
+      "pecas": [4324, 3916, 4338, 2000, 260, 4072, 2954, 2608, 3765, 4206, 4126, 4204, 1682]
+    },
+    {
+      "slug": "criancas",
+      "titulo": "Para crianças",
+      "sub": "Articulados que mexem, bichos com carinha e brinquedos que passam de mão em mão.",
+      "pecas": [4048, 4046, 2465, 3157, 4234, 4205, 2523, 3853, 4164, 3950, 3951, 4098, 4292, 1902, 2199]
+    },
+    {
+      "slug": "datas",
+      "titulo": "Datas e festas",
+      "sub": "Enfeites de época e presentes com nome: o que se encomenda com antecedência.",
+      "pecas": [4338, 4339, 3463, 3480, 2199, 2954, 3790, 3529, 3531]
+    },
+    {
+      "slug": "mesa-gamer",
+      "titulo": "Mesa e games",
+      "sub": "Suportes de fone, torres de dados, deck box e miniaturas pintáveis.",
+      "pecas": [4204, 1682, 4126, 4206, 3904, 4082, 4292, 4191, 4269, 4237]
+    }
+  ]
+}
