@@ -29,13 +29,13 @@ window.acervoAdiantado = fetch('assets/catalogo.json?v=20260901f').then(function
   if (!r.ok) throw new Error('acervo indisponível (' + r.status + ')');
   return r.json();
 });
-window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919a').then(function (r) {
+window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919b').then(function (r) {
   if (!r.ok) throw new Error('vitrine indisponível (' + r.status + ')');
   return r.json();
 });
 </script>
-<link rel="stylesheet" href="css/fontes.css?v=20260919a">
-<link rel="stylesheet" href="css/vitrine.css?v=20260919a">
+<link rel="stylesheet" href="css/fontes.css?v=20260919b">
+<link rel="stylesheet" href="css/vitrine.css?v=20260919b">
 </head>
 <body data-tela="inicio">
 
@@ -137,6 +137,6 @@ window.vitrineAdiantada = fetch('assets/vitrine.json?v=20260919a').then(function
 
 <p class="aviso" id="aviso" role="status" aria-live="polite"></p>
 
-<script src="js/vitrine.js?v=20260919a" defer></script>
+<script src="js/vitrine.js?v=20260919b" defer></script>
 </body>
 </html>

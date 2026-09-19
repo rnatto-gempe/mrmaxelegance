@@ -698,6 +698,13 @@
 
     quadro.classList.toggle('tem-video', temPrevia[it.id] === 'video');
 
+    // A troca de mídia só existe quando há prévia além da imagem recortada.
+    // A escolha (vídeo ou imagem) segue de uma ficha para a outra.
+    var previa = temPrevia[it.id] || '';
+    quadro.classList.toggle('tem-troca', !!previa);
+    quadro.setAttribute('data-midia', previa ? midiaFicha : 'recorte');
+    marcaTrocaMidia(quadro, previa);
+
     // Sem vídeo, a ficha mostra a foto da galeria embaixo do nome: é a
     // peça em cena real, coisa que a imagem recortada do card não conta.
     if (temPrevia[it.id] === 'foto') {
@@ -729,6 +736,28 @@
     elFicha.setAttribute('data-aberta', 'sim');
     document.body.style.overflow = 'hidden';
     elFicha.querySelector('.ficha-fechar').focus();
+  }
+
+  var midiaFicha = 'previa';   // 'previa' (vídeo ou foto) | 'recorte' (a imagem)
+
+  function marcaTrocaMidia(quadro, previa) {
+    var atual = quadro.getAttribute('data-midia');
+    Array.prototype.forEach.call(quadro.querySelectorAll('.midia-troca button'), function (b) {
+      b.setAttribute('aria-pressed', b.dataset.midia === atual ? 'true' : 'false');
+      if (b.dataset.midia === 'previa') b.textContent = previa === 'foto' ? 'Foto' : 'Vídeo';
+    });
+  }
+
+  function trocaMidiaFicha(tipo) {
+    if (fichaAberta < 0) return;
+    midiaFicha = tipo === 'recorte' ? 'recorte' : 'previa';
+    var quadro = elFicha.querySelector('.ficha-img');
+    quadro.setAttribute('data-midia', midiaFicha);
+    marcaTrocaMidia(quadro, temPrevia[visiveis[fichaAberta].id] || '');
+    var v = quadro.querySelector('video');
+    if (!v) return;
+    if (midiaFicha === 'recorte') v.pause();
+    else { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
   }
 
   function fechaFicha() {
@@ -947,7 +976,9 @@
 
     // fechar / navegar
     elFicha.addEventListener('click', function (e) {
-      if (e.target === elFicha) fechaFicha();
+      if (e.target === elFicha) { fechaFicha(); return; }
+      var t = e.target.closest('.midia-troca button');
+      if (t) trocaMidiaFicha(t.dataset.midia);
     });
     /* O pedido é a única conversão que este site tem, e ele sai por cinco
        portas: a ficha, o botão do topo, o CTA de "nada encontrado", o do

@@ -41,6 +41,14 @@
   var lista = [];           // ids marcados para o cliente, na ordem do toque
   var nomeCliente = '';
 
+  /* Cada peça tem duas mídias: a imagem recortada (todas têm) e a prévia —
+     vídeo de 3 s para quase todas, foto de cena para as 125 que a origem
+     nunca filmou. `previa` mostra a prévia; `recorte`, a imagem. A escolha
+     vale para a coleção inteira e fica guardada: quem prefere ver a peça
+     parada não quer repetir o toque a cada slide. */
+  var CHAVE_MIDIA = 'mrmax.vitrine.midia';
+  var midiaPreferida = 'previa';
+
   var el = {};
   var reduz = window.matchMedia('(prefers-reduced-motion: reduce)');
   var observador = null;
@@ -301,15 +309,17 @@
     var cats = it.cats.map(function (c) { return '<span>' + escapa(nomeCategoria(c)) + '</span>'; });
     cats.push('<span>' + materialTexto(it.material) + '</span>');
     var na = lista.indexOf(it.id) !== -1;
+    var midia = previa ? midiaPreferida : 'recorte';
 
     return '<article class="slide" data-i="' + i + '" data-id="' + it.id + '" aria-label="' + escapa(it.nome) + '">'
-         + '<div class="slide-quadro p' + it.desenho + (previa ? ' tem-' + previa : '') + '" style="--h:' + it.matiz + '">'
+         + '<div class="slide-quadro p' + it.desenho + (previa ? ' tem-' + previa : '') + '" '
+         + 'style="--h:' + it.matiz + '" data-midia="' + midia + '">'
          + '<img class="recorte" src="assets/catalogo/' + it.id + '.webp" alt="' + escapa(it.nome) + '" '
          + 'width="' + it.larg + '" height="' + it.alt + '" loading="lazy" decoding="async">'
          + (previa === 'foto'
              ? '<img class="previa" src="assets/hover/' + it.id + '.webp" alt="' + escapa(it.nome) + ' — foto da peça" loading="lazy" decoding="async">'
-               + '<span class="slide-dica">toque para ver a foto</span>'
              : '')
+         + (previa ? trocaMidiaHtml(previa, midia) : '')
          + '</div>'
          + '<div class="slide-info">'
          + '<span class="slide-cod mono">' + escapa(it.codigo) + ' · ' + (i + 1) + ' de ' + pecas.length + '</span>'
@@ -320,6 +330,39 @@
          + '<button type="button" class="btn-lista" data-id="' + it.id + '" aria-pressed="' + (na ? 'true' : 'false') + '">'
          + svgCoracao() + '<span>' + (na ? 'Anotada' : 'Anotar para o cliente') + '</span></button>'
          + '</div></div></article>';
+  }
+
+  /* ------------------------------------------------------------
+     A troca de mídia — vídeo (ou foto) de um lado, imagem do outro
+     ------------------------------------------------------------ */
+
+  function trocaMidiaHtml(previa, midia) {
+    return '<div class="midia-troca" role="group" aria-label="O que mostrar da peça">'
+         + '<button type="button" data-midia="previa" aria-pressed="' + (midia === 'previa') + '">'
+         + (previa === 'video' ? 'Vídeo' : 'Foto') + '</button>'
+         + '<button type="button" data-midia="recorte" aria-pressed="' + (midia === 'recorte') + '">Imagem</button>'
+         + '</div>';
+  }
+
+  // Vale para todos os slides de uma vez: a escolha é da pessoa, não da peça.
+  function trocaMidia(tipo) {
+    midiaPreferida = tipo === 'recorte' ? 'recorte' : 'previa';
+    guarda(CHAVE_MIDIA, midiaPreferida);
+
+    Array.prototype.forEach.call(el.palco.querySelectorAll('.slide-quadro.tem-video, .slide-quadro.tem-foto'), function (q) {
+      q.setAttribute('data-midia', midiaPreferida);
+      Array.prototype.forEach.call(q.querySelectorAll('.midia-troca button'), function (b) {
+        b.setAttribute('aria-pressed', b.dataset.midia === midiaPreferida ? 'true' : 'false');
+      });
+    });
+
+    // o vídeo do slide atual para ou volta junto com a troca
+    var v = el.palco.querySelector('video');
+    if (midiaPreferida === 'recorte') { if (v) v.pause(); }
+    else if (v) tocaVideo(v);
+    else ligaVideo(atual);
+
+    avisa(midiaPreferida === 'recorte' ? 'Mostrando a imagem' : 'Mostrando a prévia');
   }
 
   function chegouEm(i) {
@@ -369,7 +412,7 @@
     var it = pecas[i];
     if (!it || temPrevia[it.id] !== 'video' || reduz.matches) return;
     var quadro = el.palco.querySelector('.slide[data-i="' + i + '"] .slide-quadro');
-    if (!quadro) return;
+    if (!quadro || quadro.getAttribute('data-midia') !== 'previa') return;
 
     var v = document.createElement('video');
     v.muted = true;
@@ -634,12 +677,14 @@
       abreInicio();
     });
 
-    // palco: coração e a troca recorte/foto
+    // palco: coração e a troca de mídia (pelo seletor ou tocando no quadro)
     el.palco.addEventListener('click', function (e) {
       var b = e.target.closest('.btn-lista');
       if (b) { alterna(Number(b.dataset.id)); return; }
-      var q = e.target.closest('.slide-quadro.tem-foto');
-      if (q) q.classList.toggle('mostra-foto');
+      var t = e.target.closest('.midia-troca button');
+      if (t) { trocaMidia(t.dataset.midia); return; }
+      var q = e.target.closest('.slide-quadro.tem-video, .slide-quadro.tem-foto');
+      if (q) trocaMidia(q.getAttribute('data-midia') === 'previa' ? 'recorte' : 'previa');
     });
 
     // trilho e grade: pular para a peça
@@ -734,6 +779,7 @@
       .forEach(function (id) { el[id] = document.getElementById(id); });
 
     carregaLista();
+    midiaPreferida = le(CHAVE_MIDIA) === 'recorte' ? 'recorte' : 'previa';
     liga();
 
     var acervoChegando = window.acervoAdiantado || fetch(ARQ_ACERVO).then(function (r) { return r.json(); });

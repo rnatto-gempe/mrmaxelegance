@@ -30,8 +30,8 @@
     if (!r.ok) throw new Error('catálogo indisponível (' + r.status + ')');
     return r.json();
   });</script>
-<link rel="stylesheet" href="css/fontes.css?v=20260919a">
-<link rel="stylesheet" href="css/catalogo.css?v=20260919a">
+<link rel="stylesheet" href="css/fontes.css?v=20260919b">
+<link rel="stylesheet" href="css/catalogo.css?v=20260919b">
 </head>
 <body>
 
@@ -95,8 +95,14 @@
 
     <!-- As setas moram dentro do quadro da peça, e não na caixa inteira:
          presas à caixa, a de avançar caía por cima da lista de texto. -->
-    <div class="ficha-img">
+    <div class="ficha-img" data-midia="recorte">
       <img src="" alt="">
+      <!-- A troca de mídia: o vídeo (ou a foto de cena) de um lado, a imagem
+           recortada do outro. O CSS só a mostra quando a peça tem as duas. -->
+      <div class="midia-troca" role="group" aria-label="O que mostrar da peça">
+        <button type="button" data-midia="previa" aria-pressed="true">Vídeo</button>
+        <button type="button" data-midia="recorte" aria-pressed="false">Imagem</button>
+      </div>
       <button type="button" class="ficha-passo ant" aria-label="Peça anterior">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
       </button>
@@ -164,8 +170,8 @@
   </div>
 </footer>
 
-<script src="js/chave-posthog.js?v=20260919a" defer></script>
-<script src="js/metricas.js?v=20260919a" defer></script>
-<script src="js/catalogo.js?v=20260919a" defer></script>
+<script src="js/chave-posthog.js?v=20260919b" defer></script>
+<script src="js/metricas.js?v=20260919b" defer></script>
+<script src="js/catalogo.js?v=20260919b" defer></script>
 </body>
 </html>

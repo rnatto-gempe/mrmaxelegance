@@ -248,32 +248,50 @@ button { font: inherit; color: inherit; }
   filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .5));
   transition: opacity .35s ease;
 }
-/* o vídeo vem por cima da foto recortada; ela fica de poster */
+/* Duas mídias no mesmo quadro, e `data-midia` diz qual está na frente:
+   `previa` é o vídeo (ou a foto de cena, para quem não tem vídeo),
+   `recorte` é a imagem da peça sozinha. A imagem fica sempre embaixo, de
+   poster: o vídeo só a cobre quando está de fato rodando. */
 .slide-quadro video { opacity: 0; transition: opacity .4s ease; }
-.slide-quadro video.pronto { opacity: 1; }
-.slide-quadro.tem-video video.pronto ~ img.recorte,
-.slide-quadro.tem-video img.recorte.escondida { opacity: 0; }
+.slide-quadro[data-midia="previa"] video.pronto { opacity: 1; }
+.slide-quadro[data-midia="previa"] video.pronto ~ img.recorte { opacity: 0; }
 
-/* a foto de cena real, para quem não tem vídeo: um toque troca */
 .slide-quadro img.previa { object-fit: cover; opacity: 0; transition: opacity .3s ease; }
-.slide-quadro.mostra-foto img.previa { opacity: 1; }
-.slide-quadro.mostra-foto img.recorte { opacity: 0; }
+.slide-quadro.tem-foto[data-midia="previa"] img.previa { opacity: 1; }
+.slide-quadro.tem-foto[data-midia="previa"] img.recorte { opacity: 0; }
 
-.slide-dica {
+.slide-quadro[data-midia="recorte"] video,
+.slide-quadro[data-midia="recorte"] img.previa { opacity: 0; }
+
+/* o seletor no canto do quadro: Vídeo | Imagem */
+.midia-troca {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
-  z-index: 2;
-  padding: 6px 10px;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  padding: 3px;
   border-radius: 999px;
-  background: rgba(5, 7, 10, .7);
+  background: rgba(5, 7, 10, .72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09);
+}
+.midia-troca button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--cinza-1);
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--cinza-1);
-  pointer-events: none;
+  cursor: pointer;
 }
+.midia-troca button:hover { color: var(--branco); }
+.midia-troca button[aria-pressed="true"] { background: var(--branco); color: var(--preto); }
 
 .slide-info {
   padding: 14px 18px calc(6px + var(--seguro-base));

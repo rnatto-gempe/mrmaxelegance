@@ -682,6 +682,14 @@ foi marcado, aceita o nome de quem está escolhendo e gera duas mensagens de Wha
 
 A lista também fica no navegador; **Limpar** zera para o próximo atendimento.
 
+### Vídeo ou imagem
+
+Cada peça tem duas mídias: a imagem recortada (todas têm) e a prévia — vídeo de 3 s para
+quase todas, foto de cena para as 125 que a origem nunca filmou. O seletor **Vídeo | Imagem**
+no canto do quadro troca entre elas, tanto no slide da vitrine quanto na ficha do catálogo.
+Na vitrine a escolha vale para a coleção inteira e fica guardada no navegador; na ficha
+ela segue de uma peça para a outra enquanto a página está aberta. Tocar no quadro também troca.
+
 ### Atalhos
 
 `←` `→` andam, `espaço` anota, `G` abre a grade com todas as peças da coleção, `L` a
