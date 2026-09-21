@@ -10,7 +10,7 @@ publicado no GitHub Pages. HTML, CSS e JavaScript puros — sem build, sem depen
 | `index.html` | `/` | **Home institucional.** Título impresso letra a letra, régua lateral que mede a página em centímetros reais, índice de peças, ficha técnica de materiais, processo em 4 passos, galeria e CTA de orçamento. |
 | `links.html` | `/links.html` | **Bio links** para as redes sociais, com painel de analytics local (atalho `Ctrl/Cmd + Shift + A` ou três cliques na marca do rodapé) e exportação CSV. |
 | `lp.html` | `/lp.html` | Landing page antiga de scrollytelling 3D (vídeo `assets/materialization.mp4`), mantida como histórico. |
-| `catalogo.html` | `/catalogo.html` | **Catálogo de modelos para pedido.** Mosaico com 4.224 peças, régua de categorias, busca por nome (que entende português) e pedido direto no WhatsApp. Página `noindex, nofollow`. |
+| `catalogo.html` | `/catalogo.html` | **Catálogo de modelos para pedido.** Mosaico com 4.291 peças, régua de categorias, busca por nome (que entende português) e pedido direto no WhatsApp. Página `noindex, nofollow`. |
 
 ## Estrutura
 
@@ -595,15 +595,24 @@ fundo transparente por elas).
 
 ### Quando o acervo crescer
 
-Os scripts que montaram o catálogo ficaram fora do repositório (eles carregam credencial
-de acesso ao acervo). O que precisa acontecer para atualizar:
+Quatro comandos, nesta ordem, dentro da pasta do repositório:
 
-1. Buscar a lista de peças e guardar as novas.
-2. Rodar as imagens novas pelos quatro passos acima, para `assets/catalogo/`.
-3. Regerar `assets/catalogo.json` com id, nome, categorias, material, formato do card,
-   matiz do fundo, desenho do preenchimento e as medidas da imagem.
-4. Subir a versão nos links de `catalogo.html` (`?v=…`), para o Cloudflare soltar o
-   arquivo novo na hora.
+```bash
+python tools/raspa-stlflix.py              # lê o acervo de origem -> tools/dados/stlflix.json
+python tools/adiciona-pecas.py --gravar    # baixa a foto, recorta e acrescenta cada peça nova
+python tools/converte-hover.py --ids <os ids que o passo anterior listou>
+python tools/classifica-sensorial.py --gravar
+```
+
+`tools/adiciona-pecas.py` refaz os quatro passos da imagem (título fora, fundo por conexão,
+medida, matiz) e escreve cada peça nova **no fim** de `assets/catalogo.json` — a posição é o
+código da peça, e isso é contrato. Sem `--gravar` ele só lista o que entraria; `--ids` e
+`--limite` recortam a lista. As faixas do catálogo saem da taxonomia da origem por uma
+tabela no próprio script (`POR_CATEGORIA`, `POR_SUBCATEGORIA`), aprendida do que já estava
+no catálogo. No Windows, se o console reclamar de acento, rode com `PYTHONIOENCODING=utf-8`.
+
+Depois, na mão: trocar o `?v=` de `assets/catalogo.json` em `catalogo.html` e `vitrine.html`,
+e o número de peças na home (`index.html`) e nesta tabela.
 
 ## Os dois caminhos para o catálogo, na home
 

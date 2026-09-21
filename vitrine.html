@@ -25,7 +25,7 @@
      quais peças entram e em que ordem. Ver a nota em catalogo.html sobre
      por que isto não é um <link rel="preload" as="fetch">. -->
 <script>
-window.acervoAdiantado = fetch('assets/catalogo.json?v=20260901f').then(function (r) {
+window.acervoAdiantado = fetch('assets/catalogo.json?v=20260920a').then(function (r) {
   if (!r.ok) throw new Error('acervo indisponível (' + r.status + ')');
   return r.json();
 });
