@@ -130,6 +130,16 @@
   var termo = '';
   var fichaAberta = -1;        // posição em `visiveis`
 
+  /* O modo "montar vitrine": `catalogo.html?montar=1`. O toque no card
+     deixa de abrir a ficha e passa a marcar a peça; as marcadas viram uma
+     seleção que a vitrine.html abre (`?p=ids`). A seleção fica no
+     navegador, para continuar de onde parou — e para a vitrine achá-la
+     sem link nenhum, como "Minha seleção". */
+  var montando = false;
+  var selecao = [];            // ids marcados, na ordem do toque
+  var CHAVE_SELECAO = 'mrmax.vitrine.selecao';
+  var elBarra;
+
   var temPrevia = {};          // { id: 'video' | 'foto' } — o que há em assets/hover
   var previaAtiva = null;      // só um vídeo toca por vez, no card sob o mouse
   var esperaPrevia = 0;
@@ -480,12 +490,15 @@
     // a matiz e o desenho do fundo viajam no próprio card; o CSS faz o resto
     var previa = temPrevia[it.id] || '';
     var marca = previa ? ' tem-previa tem-' + previa : '';
-    return '<button type="button" class="peca f' + it.formato + ' p' + it.desenho + marca + '" '
-         + 'style="--h:' + it.matiz + '" data-pos="' + pos + '" '
-         + 'aria-label="' + escapa(it.nome) + ' — abrir para pedir">'
+    var na = montando && selecao.indexOf(it.id) !== -1;
+    return '<button type="button" class="peca f' + it.formato + ' p' + it.desenho + marca + (na ? ' na-vitrine' : '') + '" '
+         + 'style="--h:' + it.matiz + '" data-pos="' + pos + '" data-id="' + it.id + '" '
+         + 'aria-label="' + escapa(it.nome) + (montando ? ' — marcar para a vitrine' : ' — abrir para pedir') + '"'
+         + (montando ? ' aria-pressed="' + (na ? 'true' : 'false') + '"' : '') + '>'
          + '<img src="assets/catalogo/' + it.id + '.webp" alt="' + escapa(it.nome) + '" '
          + 'width="' + it.larg + '" height="' + it.alt + '" loading="lazy" decoding="async">'
          + '<span class="peca-selo">' + svgZap() + 'Pedir</span>'
+         + '<span class="peca-marca" aria-hidden="true">✓</span>'
          + (previa === 'video' ? '<span class="peca-play">' + svgPlay() + '</span>' : '')
          + '<span class="peca-tarja">'
          + '<span class="peca-nome">' + escapa(it.nome) + '</span>'
@@ -685,6 +698,13 @@
 
     quadro.classList.toggle('tem-video', temPrevia[it.id] === 'video');
 
+    // A troca de mídia só existe quando há prévia além da imagem recortada.
+    // A escolha (vídeo ou imagem) segue de uma ficha para a outra.
+    var previa = temPrevia[it.id] || '';
+    quadro.classList.toggle('tem-troca', !!previa);
+    quadro.setAttribute('data-midia', previa ? midiaFicha : 'recorte');
+    marcaTrocaMidia(quadro, previa);
+
     // Sem vídeo, a ficha mostra a foto da galeria embaixo do nome: é a
     // peça em cena real, coisa que a imagem recortada do card não conta.
     if (temPrevia[it.id] === 'foto') {
@@ -718,6 +738,28 @@
     elFicha.querySelector('.ficha-fechar').focus();
   }
 
+  var midiaFicha = 'previa';   // 'previa' (vídeo ou foto) | 'recorte' (a imagem)
+
+  function marcaTrocaMidia(quadro, previa) {
+    var atual = quadro.getAttribute('data-midia');
+    Array.prototype.forEach.call(quadro.querySelectorAll('.midia-troca button'), function (b) {
+      b.setAttribute('aria-pressed', b.dataset.midia === atual ? 'true' : 'false');
+      if (b.dataset.midia === 'previa') b.textContent = previa === 'foto' ? 'Foto' : 'Vídeo';
+    });
+  }
+
+  function trocaMidiaFicha(tipo) {
+    if (fichaAberta < 0) return;
+    midiaFicha = tipo === 'recorte' ? 'recorte' : 'previa';
+    var quadro = elFicha.querySelector('.ficha-img');
+    quadro.setAttribute('data-midia', midiaFicha);
+    marcaTrocaMidia(quadro, temPrevia[visiveis[fichaAberta].id] || '');
+    var v = quadro.querySelector('video');
+    if (!v) return;
+    if (midiaFicha === 'recorte') v.pause();
+    else { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  }
+
   function fechaFicha() {
     var v = elFicha.querySelector('.ficha-img video');
     if (v) { v.pause(); v.removeAttribute('src'); v.load(); v.remove(); }
@@ -742,6 +784,7 @@
 
   function gravaEndereco() {
     var partes = [];
+    if (montando) partes.push('montar=1');
     if (categoriaAtiva) partes.push('cat=' + encodeURIComponent(categoriaAtiva));
     if (termo) partes.push('q=' + encodeURIComponent(termo));
     var novo = location.pathname + (partes.length ? '?' + partes.join('&') : '');
@@ -752,10 +795,98 @@
     var p = new URLSearchParams(location.search);
     categoriaAtiva = p.get('cat') || '';
     termo = p.get('q') || '';
+    montando = p.get('montar') !== null;
     if (termo) {
       elBusca.value = termo;
       elCaixaBusca.classList.add('tem-texto');
     }
+  }
+
+  /* ------------------------------------------------------------
+     Montar a vitrine
+
+     A seleção é a única coisa que este modo produz. Ela vive em
+     localStorage, na mesma chave que js/vitrine.js lê, e vira link
+     (`vitrine.html?p=…`) para mandar a alguém ou abrir em outro aparelho.
+     ------------------------------------------------------------ */
+
+  function carregaSelecao() {
+    try {
+      var g = JSON.parse(localStorage.getItem(CHAVE_SELECAO));
+      if (Array.isArray(g)) selecao = g.map(Number);
+    } catch (e) { selecao = []; }
+  }
+
+  function guardaSelecao() {
+    try { localStorage.setItem(CHAVE_SELECAO, JSON.stringify(selecao)); } catch (e) { /* modo privado */ }
+  }
+
+  function alternaSelecao(card) {
+    var id = Number(card.dataset.id);
+    var i = selecao.indexOf(id);
+    if (i === -1) selecao.push(id); else selecao.splice(i, 1);
+    var na = i === -1;
+    card.classList.toggle('na-vitrine', na);
+    card.setAttribute('aria-pressed', na ? 'true' : 'false');
+    guardaSelecao();
+    atualizaBarra();
+  }
+
+  function linkVitrine() {
+    return 'vitrine.html' + (selecao.length ? '?p=' + selecao.join(',') : '');
+  }
+
+  function atualizaBarra() {
+    if (!elBarra) return;
+    var n = selecao.length;
+    elBarra.querySelector('.barra-n').textContent = numero(n);
+    elBarra.querySelector('.barra-rotulo').textContent = n === 1 ? 'peça na vitrine' : 'peças na vitrine';
+    var abrir = elBarra.querySelector('.barra-abrir');
+    abrir.href = linkVitrine();
+    abrir.setAttribute('aria-disabled', n ? 'false' : 'true');
+    elBarra.querySelector('.barra-copiar').disabled = !n;
+    elBarra.querySelector('.barra-limpar').disabled = !n;
+  }
+
+  function ligaMontar() {
+    elBarra = document.getElementById('barraVitrine');
+    document.body.classList.toggle('montando', montando);
+    if (!montando || !elBarra) return;
+
+    carregaSelecao();
+    atualizaBarra();
+
+    elBarra.querySelector('.barra-copiar').addEventListener('click', function () {
+      var endereco = location.origin + location.pathname.replace(/[^\/]*$/, '') + linkVitrine();
+      var b = this;
+      function feito(ok) {
+        b.textContent = ok ? 'Link copiado' : 'Não deu para copiar';
+        setTimeout(function () { b.textContent = 'Copiar link'; }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(endereco).then(function () { feito(true); }, function () { feito(false); });
+      } else {
+        window.prompt('Copie o link da vitrine:', endereco);
+      }
+    });
+
+    elBarra.querySelector('.barra-limpar').addEventListener('click', function () {
+      if (!selecao.length) return;
+      if (!window.confirm('Tirar as ' + selecao.length + ' peças da seleção?')) return;
+      selecao = [];
+      guardaSelecao();
+      Array.prototype.forEach.call(elMosaico.querySelectorAll('.peca.na-vitrine'), function (c) {
+        c.classList.remove('na-vitrine');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      atualizaBarra();
+    });
+
+    elBarra.querySelector('.barra-sair').addEventListener('click', function () {
+      montando = false;
+      gravaEndereco();
+      location.reload();
+    });
   }
 
   /* ------------------------------------------------------------
@@ -816,10 +947,12 @@
       filtra();
     });
 
-    // abrir a ficha
+    // abrir a ficha — ou, montando a vitrine, marcar a peça
     elMosaico.addEventListener('click', function (e) {
       var c = e.target.closest('.peca');
-      if (c) abreFicha(Number(c.dataset.pos));
+      if (!c) return;
+      if (montando) alternaSelecao(c);
+      else abreFicha(Number(c.dataset.pos));
     });
 
     // A prévia entra por delegação: são 4 mil cards trocando de lugar a
@@ -843,7 +976,9 @@
 
     // fechar / navegar
     elFicha.addEventListener('click', function (e) {
-      if (e.target === elFicha) fechaFicha();
+      if (e.target === elFicha) { fechaFicha(); return; }
+      var t = e.target.closest('.midia-troca button');
+      if (t) trocaMidiaFicha(t.dataset.midia);
     });
     /* O pedido é a única conversão que este site tem, e ele sai por cinco
        portas: a ficha, o botão do topo, o CTA de "nada encontrado", o do
@@ -963,6 +1098,7 @@
         dados = json;
         prepara();
         leEndereco();
+        ligaMontar();
         montaFiltros();
         marcaFaixaAtiva();
         filtra();

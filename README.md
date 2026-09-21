@@ -10,7 +10,7 @@ publicado no GitHub Pages. HTML, CSS e JavaScript puros — sem build, sem depen
 | `index.html` | `/` | **Home institucional.** Título impresso letra a letra, régua lateral que mede a página em centímetros reais, índice de peças, ficha técnica de materiais, processo em 4 passos, galeria e CTA de orçamento. |
 | `links.html` | `/links.html` | **Bio links** para as redes sociais, com painel de analytics local (atalho `Ctrl/Cmd + Shift + A` ou três cliques na marca do rodapé) e exportação CSV. |
 | `lp.html` | `/lp.html` | Landing page antiga de scrollytelling 3D (vídeo `assets/materialization.mp4`), mantida como histórico. |
-| `catalogo.html` | `/catalogo.html` | **Catálogo de modelos para pedido.** Mosaico com 4.224 peças, régua de categorias, busca por nome (que entende português) e pedido direto no WhatsApp. Página `noindex, nofollow`. |
+| `catalogo.html` | `/catalogo.html` | **Catálogo de modelos para pedido.** Mosaico com 4.291 peças, régua de categorias, busca por nome (que entende português) e pedido direto no WhatsApp. Página `noindex, nofollow`. |
 
 ## Estrutura
 
@@ -595,15 +595,24 @@ fundo transparente por elas).
 
 ### Quando o acervo crescer
 
-Os scripts que montaram o catálogo ficaram fora do repositório (eles carregam credencial
-de acesso ao acervo). O que precisa acontecer para atualizar:
+Quatro comandos, nesta ordem, dentro da pasta do repositório:
 
-1. Buscar a lista de peças e guardar as novas.
-2. Rodar as imagens novas pelos quatro passos acima, para `assets/catalogo/`.
-3. Regerar `assets/catalogo.json` com id, nome, categorias, material, formato do card,
-   matiz do fundo, desenho do preenchimento e as medidas da imagem.
-4. Subir a versão nos links de `catalogo.html` (`?v=…`), para o Cloudflare soltar o
-   arquivo novo na hora.
+```bash
+python tools/raspa-stlflix.py              # lê o acervo de origem -> tools/dados/stlflix.json
+python tools/adiciona-pecas.py --gravar    # baixa a foto, recorta e acrescenta cada peça nova
+python tools/converte-hover.py --ids <os ids que o passo anterior listou>
+python tools/classifica-sensorial.py --gravar
+```
+
+`tools/adiciona-pecas.py` refaz os quatro passos da imagem (título fora, fundo por conexão,
+medida, matiz) e escreve cada peça nova **no fim** de `assets/catalogo.json` — a posição é o
+código da peça, e isso é contrato. Sem `--gravar` ele só lista o que entraria; `--ids` e
+`--limite` recortam a lista. As faixas do catálogo saem da taxonomia da origem por uma
+tabela no próprio script (`POR_CATEGORIA`, `POR_SUBCATEGORIA`), aprendida do que já estava
+no catálogo. No Windows, se o console reclamar de acento, rode com `PYTHONIOENCODING=utf-8`.
+
+Depois, na mão: trocar o `?v=` de `assets/catalogo.json` em `catalogo.html` e `vitrine.html`,
+e o número de peças na home (`index.html`) e nesta tabela.
 
 ## Os dois caminhos para o catálogo, na home
 
@@ -638,3 +647,97 @@ qual eles seguem vazios.
 
 Para publicar, coloque o arquivo em `assets/` e insira a `<img>` **antes** do
 `<span class="slot-txt">`; o texto-guia some sozinho quando existe imagem.
+
+## A vitrine presencial
+
+`vitrine.html` é o catálogo para mostrar **na mão de alguém**: uma seleção curta, uma peça
+por tela, deslizando de lado, com o vídeo da peça tocando sozinho. Não tem busca nem
+categorias — tem a coleção aberta e um coração para anotar o que a pessoa gostou.
+A página é `noindex`, como o catálogo.
+
+| Endereço | O que abre |
+|---|---|
+| `vitrine.html` | A escolha da coleção. Se este aparelho montou uma seleção no catálogo, ela aparece primeiro como **Minha seleção**. |
+| `vitrine.html?c=casa` | Uma coleção de `assets/vitrine.json`, pelo `slug`. |
+| `vitrine.html?p=4324,4048,3853` | Uma seleção avulsa, pelos ids das peças — é o link que o catálogo gera. `#3` no fim abre na terceira peça. |
+
+### As coleções
+
+Ficam em `assets/vitrine.json`, e editar o arquivo é o jeito de mudar o que vai para a
+mesa. Cada coleção tem `slug` (vai na URL), `titulo`, `sub` (uma linha de contexto) e
+`pecas` (a lista de ids, na ordem de exibição). O id é o `MM-<número>` da peça, o mesmo
+do nome da imagem em `assets/catalogo/`. Uma peça que saiu do acervo é ignorada em
+silêncio; uma coleção que ficou sem peça nenhuma some da escolha.
+
+### Publicando coleções pelo celular
+
+O site não tem servidor, mas a vitrine grava as coleções direto no repositório, pela API
+de conteúdo do GitHub (`js/publica.js`). O aparelho que publica precisa de uma **chave**:
+um token de acesso pessoal granular, restrito a este repositório, só com
+`Contents: Read and write`. Ela fica no `localStorage` daquele aparelho e nunca entra no
+código — o repositório é público.
+
+Para conectar um celular: abra `vitrine.html`, toque em **Conectar** no bloco de
+publicação, cole a chave. A vitrine confere quem é a chave e se ela escreve no
+repositório antes de guardá-la. **Desconectar** apaga a chave do aparelho.
+
+Com a chave, a tela inicial ganha ações:
+
+| Onde | Ação | O que faz |
+|---|---|---|
+| **Minha seleção** | Publicar no site | Pede nome, uma linha de contexto e o endereço (sai do nome); grava em `assets/vitrine.json`. Se o endereço já existe, substitui a coleção. |
+| **Minha seleção** | Descartar | Zera a seleção do aparelho. |
+| Coleção publicada | Editar no catálogo | Carrega as peças da coleção na seleção e abre o catálogo em modo montar. Ao publicar de volta, a coleção é substituída — não duplicada. |
+| Coleção publicada | Excluir | Tira a coleção do site. |
+| Palco, com `?p=` | Botão de publicar no topo | Publica a seleção avulsa que veio do catálogo. |
+
+A gravação lê o arquivo do repositório, troca só a coleção em questão e grava de volta —
+por isso dois aparelhos podem publicar sem um apagar o do outro. Cada publicação vira um
+commit no `main` ("Vitrine: nova coleção …"). O GitHub Pages republica em um ou dois
+minutos; a vitrine busca `vitrine.json` com `cache: 'no-cache'`, então a coleção nova
+aparece na próxima abertura, sem `?v=` para trocar.
+
+Criando a chave, no GitHub: Settings → Developer settings → Personal access tokens →
+Fine-grained tokens → Generate new token. Em *Repository access*, **Only select
+repositories** → `mrmaxelegance`. Em *Permissions → Repository*, **Contents: Read and
+write**. Escolha a validade (a chave vence, e aí é só gerar outra e conectar de novo).
+
+### Montando uma seleção pelo catálogo
+
+`catalogo.html?montar=1` (ou o link **Montar vitrine** no rodapé do catálogo) troca o
+gesto do mosaico: o toque **marca** a peça em vez de abrir a ficha, e uma barra embaixo
+conta, copia o link (`vitrine.html?p=…`) e abre a vitrine. A busca e as categorias
+continuam funcionando, então dá para montar "vitrine de Natal" em um minuto. A seleção
+fica no navegador (`localStorage`), para continuar depois — e para a vitrine achá-la
+como **Minha seleção** sem link nenhum. **Sair** volta ao catálogo normal.
+
+### A lista do cliente
+
+Na vitrine, o coração anota a peça. A lista (ícone no topo, ou tecla `L`) mostra o que
+foi marcado, aceita o nome de quem está escolhendo e gera duas mensagens de WhatsApp:
+
+- **Mandar o pedido para a produção** — para o número da casa, com nome do cliente e
+  o código `CAT-INICIAIS-NÚMERO (MM-id)` de cada peça, o mesmo que o catálogo manda.
+- **Enviar a lista para o cliente** — sem número (o WhatsApp pergunta para quem), com
+  os nomes das peças e o link `vitrine.html?p=…` que reabre exatamente aquela seleção
+  no telefone dele.
+
+A lista também fica no navegador; **Limpar** zera para o próximo atendimento.
+
+### Vídeo ou imagem
+
+Cada peça tem duas mídias: a imagem recortada (todas têm) e a prévia — vídeo de 3 s para
+quase todas, foto de cena para as 125 que a origem nunca filmou. O seletor **Vídeo | Imagem**
+no canto do quadro troca entre elas, tanto no slide da vitrine quanto na ficha do catálogo.
+Na vitrine a escolha vale para a coleção inteira e fica guardada no navegador; na ficha
+ela segue de uma peça para a outra enquanto a página está aberta. Tocar no quadro também troca.
+
+### Atalhos
+
+`←` `→` andam, `espaço` anota, `G` abre a grade com todas as peças da coleção, `L` a
+lista, `F` a tela cheia, `Esc` fecha. No toque, o quadro da peça sem vídeo alterna
+entre o recorte e a foto de cena real.
+
+O código da peça é calculado em `js/vitrine.js` com **a mesma regra** de
+`js/catalogo.js` (tabela `PREFIXO`, ordem `ESPECIFICAS`, posição no `catalogo.json`).
+Se a regra mudar em um, muda no outro — a produção acha o pedido por esse código.

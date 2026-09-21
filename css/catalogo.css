@@ -721,12 +721,45 @@ a { color: var(--azul-claro); text-decoration: none; }
   border-radius: 8px;
   display: block;
 }
-/* Com foto de galeria, a peça recortada dá lugar a ela: são duas imagens no
-   mesmo lugar do grid, e empilhadas dobrariam a altura do quadro. */
-.ficha-img:has(img.previa) img:not(.previa) { display: none; }
-/* Com vídeo, a foto sai da vez: as duas empilhadas no mesmo grid
-   dobrariam a altura do quadro em telas estreitas. */
-.ficha-img.tem-video img { display: none; }
+/* Uma mídia por vez: são duas no mesmo lugar do grid, e empilhadas
+   dobrariam a altura do quadro em tela estreita. `data-midia` escolhe —
+   `previa` é o vídeo ou a foto de cena, `recorte` é a imagem da peça. */
+.ficha-img[data-midia="previa"] img:not(.previa) { display: none; }
+.ficha-img[data-midia="recorte"] video,
+.ficha-img[data-midia="recorte"] img.previa { display: none; }
+
+/* O seletor Vídeo | Imagem, no canto de cima. Fica à esquerda porque o
+   botão de fechar mora à direita, e no telefone os dois cairiam juntos. */
+.midia-troca {
+  display: none;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(5, 7, 10, .72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09);
+}
+.ficha-img.tem-troca .midia-troca { display: flex; }
+.midia-troca button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--cinza-1);
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.midia-troca button:hover { color: var(--branco); }
+.midia-troca button[aria-pressed="true"] { background: var(--branco); color: var(--preto); }
 
 /* ---------- nada encontrado ---------- */
 
@@ -1013,6 +1046,108 @@ a { color: var(--azul-claro); text-decoration: none; }
 .rodape-in a { color: var(--cinza-1); }
 .rodape-in a:hover { color: var(--azul-claro); }
 .rodape-links { display: flex; flex-wrap: wrap; gap: 20px; }
+
+/* ============================================================
+   Montar a vitrine — `?montar=1`
+
+   O mesmo mosaico, com outro gesto: o toque marca em vez de abrir. A
+   marca é uma borda acesa e um ✓ no canto; a barra de baixo conta e
+   leva para a vitrine.
+   ============================================================ */
+
+.barra-vitrine { display: none; }
+
+.peca-marca {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 30px;
+  height: 30px;
+  display: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--azul);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .45);
+}
+
+body.montando .peca-selo { display: none; }
+body.montando .peca-play { display: none; }
+body.montando .peca::after { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07); }
+body.montando .peca:hover::after { box-shadow: inset 0 0 0 2px rgba(79, 163, 247, .55); }
+body.montando .peca.na-vitrine::after { box-shadow: inset 0 0 0 3px var(--azul-claro); }
+body.montando .peca.na-vitrine .peca-marca { display: grid; }
+body.montando .peca.na-vitrine img { transform: scale(.94); }
+body.montando .mosaico { padding-bottom: 110px; }
+
+body.montando .barra-vitrine {
+  display: block;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 45;
+  padding: 10px clamp(12px, 2.4vw, 32px) calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(11, 16, 23, .94);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--azul-forte);
+}
+.barra-in {
+  max-width: 1780px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+}
+.barra-conta { display: flex; flex-direction: column; font-size: 14px; line-height: 1.2; }
+.barra-conta b { font-size: 20px; color: var(--azul-claro); margin-right: 4px; }
+.barra-conta small { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--cinza-3); margin-top: 3px; }
+.barra-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.barra-botao {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #2A3542;
+  border-radius: 10px;
+  background: none;
+  color: var(--cinza-1);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.barra-botao:hover { color: var(--branco); border-color: var(--azul-claro); }
+.barra-botao[disabled] { opacity: .35; cursor: default; }
+.barra-botao[disabled]:hover { color: var(--cinza-1); border-color: #2A3542; }
+
+.barra-abrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--azul);
+  color: #fff;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 13px;
+}
+.barra-abrir svg { width: 16px; height: 16px; }
+.barra-abrir:hover { background: var(--azul-claro); }
+.barra-abrir[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+
+@media (max-width: 520px) {
+  .barra-conta small { display: none; }
+  .barra-acoes { width: 100%; }
+  .barra-abrir { margin-left: auto; }
+}
 
 /* ============================================================
    Quem prefere menos movimento vê a mesma página, parada
